@@ -11,6 +11,6 @@ export interface GitHubUrls {
 }
 
 export interface AppConfiguration {
-    environment: AppEnvironment,
-    githubBaseUrl: string
+    environment: AppEnvironment;
+    githubBaseUrl: string;
 }

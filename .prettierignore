@@ -1,0 +1,12 @@
+.next/
+assets/
+build/
+coverage/
+styles/
+data/
+*.strings.js
+*.d.ts
+*.css
+*.log
+store/common/
+yarn.lock

@@ -6,12 +6,12 @@ import { Toaster } from "react-hot-toast";
 import "@/styles/globals.css";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
-  return (
-    <>
-      <Toaster />
-      <Component {...pageProps} />
-    </>
-  );
+    return (
+        <>
+            <Toaster />
+            <Component {...pageProps} />
+        </>
+    );
 };
 
 export default api.withTRPC(MyApp);

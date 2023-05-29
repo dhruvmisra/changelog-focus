@@ -1,3 +1,28 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.release-section-list-item {
+    @apply px-2 py-1 my-0 rounded-md cursor-pointer transition-colors border border-transparent;
+}
+
+.release-section-list-item.selected {
+    background: rgba(0 0 0 / 60%);
+    @apply border-green-700;
+}
+
+.release-section-list-item p {
+    @apply my-0;
+}
+
+.release-section-list-item:hover {
+    background: rgba(0 0 0 / 40%);
+}
+
+.focus .release-section-list-item.selected {
+    @apply border-transparent bg-transparent;
+}
+
+.focus .release-section-list-item {
+    @apply cursor-auto;
+}
