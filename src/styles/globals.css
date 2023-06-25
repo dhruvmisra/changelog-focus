@@ -2,21 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+    background-color: theme("colors.dark");
+    background-image: radial-gradient(circle 50vh at top center, theme("colors.cyan.900") 0, transparent 100%);
+}
+
+.releases-changelog-container {
+    display: grid;
+    gap: 1em;
+    grid-template-columns: minmax(150px, 25%) 1fr;
+}
+.releases-container {
+    position: sticky;
+    top: 0;
+}
+
+@media (max-width: 768px) {
+    .releases-changelog-container {
+        display: block;
+    }
+    .releases-container {
+        display: block;
+        position: relative;
+    }
+}
+
 .release-section-list-item {
     @apply px-2 py-1 my-0 rounded-md cursor-pointer transition-colors border border-transparent;
 }
 
 .release-section-list-item.selected {
-    background: rgba(0 0 0 / 60%);
-    @apply border-green-700;
+    /* background: rgba(0 0 0 / 60%); */
+    @apply border-green-700 bg-gray-950;
 }
 
 .release-section-list-item p {
+    word-wrap: break-word;
     @apply my-0;
-}
-
-.release-section-list-item:hover {
-    background: rgba(0 0 0 / 40%);
 }
 
 .focus .release-section-list-item.selected {
@@ -25,4 +47,17 @@
 
 .focus .release-section-list-item {
     @apply cursor-auto;
+}
+
+.focus-info {
+    opacity: 0;
+    transition: opacity 300ms ease-out, transform 300ms ease-out;
+    transform: translateX(-0.5em);
+}
+.focus-info:hover {
+    opacity: 1 !important;
+}
+.release-section:hover .focus-info {
+    opacity: 0.5;
+    transform: translateX(0);
 }

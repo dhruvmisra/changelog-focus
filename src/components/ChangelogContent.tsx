@@ -1,10 +1,11 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { type Release } from "@/utils/github";
-import { FormEvent, MouseEvent, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { type MouseEvent } from "react";
 import { marked } from "marked";
 import * as DOMPurify from "dompurify";
-import { useMap, useEffectOnce } from "react-use";
+import { useMap } from "react-use";
 import { slugify } from "@/utils/common";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
@@ -48,29 +49,22 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         // section.children.sort((a, b) => Number(b.selected) - Number(a.selected))
     }
 
-    useEffectOnce(() => {
+    useEffect(() => {
         let tokens: marked.Token[] = [];
         for (const release of releases) {
             const releaseTokens = marked.lexer(release.body);
-            // delete releaseTokens.links
             tokens = tokens.concat(releaseTokens);
         }
 
         const localSegregatedChangelog: SegregatedChangelog = {};
         localSegregatedChangelog[OTHER_SECTION_HEADING] = { children: [], displayName: "Other" };
-        const traversedTokens = traverseTokensTree(
-            tokens,
-            localSegregatedChangelog,
-            OTHER_SECTION_HEADING
-        );
+        traverseTokensTree(tokens, localSegregatedChangelog, OTHER_SECTION_HEADING);
         if (localSegregatedChangelog[OTHER_SECTION_HEADING]?.children.length === 0) {
             delete localSegregatedChangelog[OTHER_SECTION_HEADING];
         }
 
         setAll(localSegregatedChangelog);
-        // const content = DOMPurify.sanitize(marked.parser(traversedTokens));
-        // console.log(content)
-    });
+    }, [releases]);
 
     const traverseListItems = (
         listItems: marked.Tokens.ListItem[],
@@ -153,11 +147,10 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         <div className={`release-container container px-4 pb-10 ${isFocused ? "focus" : ""}`}>
             <button
                 type="button"
-                className={`ml-auto mt-2 block w-auto rounded-md px-2 py-1 text-center text-sm font-medium text-white focus:outline-none focus:ring-2 disabled:bg-transparent disabled:font-normal disabled:text-slate-400 ${
-                    isFocused
+                className={`ml-auto mt-2 block w-auto rounded-md px-2 py-1 text-center text-sm font-medium text-white focus:outline-none focus:ring-2 disabled:bg-transparent disabled:font-normal disabled:text-slate-400 ${isFocused
                         ? "bg-red-700 hover:bg-red-800 focus:ring-red-300"
                         : "bg-green-700 hover:bg-green-800 focus:ring-green-300"
-                }`}
+                    }`}
                 onClick={() => setIsFocused(!isFocused)}
                 disabled={!focusAvailable}
             >
@@ -175,27 +168,28 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                             className="release-section prose my-2 max-w-full dark:prose-invert"
                             key={i}
                         >
-                            <h3 className="block">{section.displayName}</h3>{" "}
-                            {isFocused && (
-                                <span className="focus-info text-xs text-slate-500">
-                                    FOCUSING ON{" "}
-                                    <b>
-                                        {section.children.reduce(
-                                            (acc, child) => acc + Number(child.selected),
-                                            0
-                                        )}
-                                    </b>{" "}
-                                    OUT OF <b>{section.children.length}</b> ITEMS
-                                </span>
-                            )}
+                            <div className="flex items-center mb-2.5">
+                                <h3 className="mt-0 mb-0">{section.displayName}</h3>{" "}
+                                {isFocused && (
+                                    <span className="focus-info text-xs ml-4 text-slate-500">
+                                        {/* FOCUSING ON{" "} */}
+                                        <b>
+                                            {section.children.reduce(
+                                                (acc, child) => acc + Number(child.selected),
+                                                0
+                                            )}
+                                        </b>{" "}
+                                        OUT OF <b>{section.children.length}</b> ITEMS
+                                    </span>
+                                )}
+                            </div>
                             <ul className="release-section-list mt-0" ref={listRef}>
                                 {section.children.map(
                                     (child) =>
                                         (!isFocused || (isFocused && child.selected)) && (
                                             <li
-                                                className={`release-section-list-item ${
-                                                    child.selected && "selected"
-                                                }`}
+                                                className={`release-section-list-item ${child.selected ? "selected" : ""
+                                                    } hover:bg-gray-900`}
                                                 key={child.slug}
                                                 id={child.slug}
                                                 onClick={(e) => handleListItemClick(e, headingKey)}
@@ -214,7 +208,6 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                         </div>
                     )
             )}
-            {/* <pre>{JSON.stringify(segregatedChangelog, null, 2)}</pre> */}
         </div>
     );
 };

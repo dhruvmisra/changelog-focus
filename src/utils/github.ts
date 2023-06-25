@@ -1,5 +1,5 @@
 import { GithubAxiosInstance } from "@/config/axiosConfig";
-import { GITHUB_RELEASES } from "@/config/endpoints";
+import { GITHUB_RELEASES } from "@/constants/endpoints";
 
 export type Release = {
     id: number;
