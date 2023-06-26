@@ -27,7 +27,7 @@ body {
     }
 }
 
-.release-section-list-item {
+.release-section-list-item {    
     @apply px-2 py-1 my-0 rounded-md cursor-pointer transition-colors border border-transparent;
 }
 
@@ -58,6 +58,42 @@ body {
     opacity: 1 !important;
 }
 .release-section:hover .focus-info {
+    opacity: 0.5;
+    transform: translateX(0);
+}
+
+.release-section-heading-btn {
+    max-width: 2em;
+    height: 2em;
+    padding: 0.2em 0.5em;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: opacity 300ms ease-out, transform 300ms ease-out, max-width 500ms ease-out;
+}
+.release-section-heading-btn:hover {
+    opacity: 1 !important;
+    max-width: 300px;
+    text-overflow: ellipsis;
+}
+.release-section-heading-btn.remove-btn {
+    opacity: 0;
+    transform: translateX(-0.5em);
+}
+.release-section-heading-btn.restore-btn {
+    opacity: 0.5;
+    transform: translateX(0);
+}
+.release-section-heading-btn.restore-btn .icon {
+    margin: 0 0.2em;
+}
+.release-section-heading-btn .text {
+    opacity: 0;
+    transition: opacity 300ms ease-out;
+}
+.release-section-heading-btn:hover .text {
+    opacity: 1 !important;
+}
+.release-section:hover .release-section-heading-btn {
     opacity: 0.5;
     transform: translateX(0);
 }

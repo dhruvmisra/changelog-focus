@@ -1,15 +1,6 @@
 import { GithubAxiosInstance } from "@/config/axiosConfig";
 import { GITHUB_RELEASES } from "@/constants/endpoints";
-
-export type Release = {
-    id: number;
-    name: string;
-    body: string;
-    url: string;
-    prerelease: true;
-    draft: true;
-    created_at: string;
-};
+import { Release } from "@/types";
 
 export const GitHub = {
     getReleases: async (owner: string, repo: string, limit: number = 10): Promise<Release[]> => {

@@ -14,3 +14,7 @@ export interface AppConfiguration {
     environment: AppEnvironment;
     githubBaseUrl: string;
 }
+
+export type Selectable = {
+    selected: boolean;
+};

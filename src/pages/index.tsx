@@ -1,22 +1,18 @@
 import { type NextPage } from "next";
 import { useQuery } from "@tanstack/react-query";
-import { type Release, GitHub } from "@/utils/github";
+import { GitHub } from "@/utils/github";
 
 import Head from "next/head";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { api } from "@/utils/api";
 import { FormEvent, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ChangelogContent from "@/components/ChangelogContent";
 import { GITHUB_BASE_URL } from "@/constants/endpoints";
+import { Release, Selectable } from "@/types";
 
 dayjs.extend(relativeTime);
-
-type Selectable = {
-    selected: boolean;
-};
 
 type SelectableRelease = Release & Selectable;
 
@@ -48,7 +44,7 @@ const Home: NextPage = () => {
         refetch: refetchReleases,
         isFetched: releasesFetched,
         isInitialLoading,
-        isRefetching
+        isRefetching,
     } = useQuery<Release[]>(["releases"], getReleases, {
         enabled: false,
         onError: (error: any) => {
@@ -143,7 +139,7 @@ const Home: NextPage = () => {
             </Head>
             <main className="flex min-h-screen flex-col items-center" ref={mainRef}>
                 <div className="container flex flex-col items-center justify-center py-4 ">
-                    <h1 className="py-8 text-5xl font-extrabold tracking-tight drop-shadow-md text-white sm:text-[5rem]">
+                    <h1 className="py-8 text-5xl font-extrabold tracking-tight text-white drop-shadow-md sm:text-[5rem]">
                         Changelog <span className="text-violet-600 drop-shadow-md">Simplify</span>
                     </h1>
 
@@ -162,7 +158,7 @@ const Home: NextPage = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="mx-auto block w-full rounded-lg bg-violet-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-300 sm:w-auto disabled:bg-gray-800 disabled:text-gray-400 disabled:border-gray-600 disabled:font-normal"
+                            className="mx-auto block w-full rounded-lg bg-violet-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-300 disabled:border-gray-600 disabled:bg-gray-800 disabled:font-normal disabled:text-gray-400 sm:w-auto"
                         >
                             {isLoading ? (
                                 <>

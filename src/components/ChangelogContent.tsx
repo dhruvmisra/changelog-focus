@@ -1,13 +1,14 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { type Release } from "@/utils/github";
-import { useState, useEffect } from "react";
-import { type MouseEvent } from "react";
+import { useState, useEffect, MouseEvent } from "react";
 import { marked } from "marked";
-import * as DOMPurify from "dompurify";
 import { useMap } from "react-use";
 import { slugify } from "@/utils/common";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { OTHER_SECTION_HEADING } from "@/constants";
+import { SegregatedChangelog, Release } from "@/types";
+import ChangelogContentHeading from "@/components/ChangelogContentHeading";
+import ChangelogContentList from "@/components/ChangelogContentList";
 
 dayjs.extend(relativeTime);
 
@@ -15,30 +16,17 @@ type ChangelogContentProps = {
     releases: Release[];
 };
 
-type SegregatedChangelogSectionChild = marked.Token & {
-    slug: string;
-    selected: boolean;
-    tokens: any[];
-};
-
-type SegregatedChangelogSection = {
-    children: SegregatedChangelogSectionChild[];
-    displayName: string | null;
-};
-
-type SegregatedChangelog = {
-    [key: string]: SegregatedChangelogSection;
-};
-
-const OTHER_SECTION_HEADING = "Other";
-
 const ChangelogContent = ({ releases }: ChangelogContentProps) => {
-    const [listRef] = useAutoAnimate();
-    const [segregatedChangelog, { set, setAll, remove }] = useMap<SegregatedChangelog>();
+    const [autoAnimateRef] = useAutoAnimate();
+    const [
+        segregatedChangelog,
+        { set: setSegregatedChangelog, setAll: setAllSegregatedChangelog },
+    ] = useMap<SegregatedChangelog>();
     const [isFocused, setIsFocused] = useState<boolean>(false);
 
     let focusAvailable = false;
     for (const section of Object.values(segregatedChangelog)) {
+        if (section.hidden) continue;
         for (const child of section.children) {
             if (child.selected) {
                 focusAvailable = true;
@@ -47,6 +35,13 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         }
         if (focusAvailable) break;
         // section.children.sort((a, b) => Number(b.selected) - Number(a.selected))
+    }
+    let isAnySectionHidden = false;
+    for (const section of Object.values(segregatedChangelog)) {
+        if (section.hidden) {
+            isAnySectionHidden = true;
+            break;
+        }
     }
 
     useEffect(() => {
@@ -57,13 +52,17 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         }
 
         const localSegregatedChangelog: SegregatedChangelog = {};
-        localSegregatedChangelog[OTHER_SECTION_HEADING] = { children: [], displayName: "Other" };
+        localSegregatedChangelog[OTHER_SECTION_HEADING] = {
+            children: [],
+            displayName: "Other",
+            hidden: false,
+        };
         traverseTokensTree(tokens, localSegregatedChangelog, OTHER_SECTION_HEADING);
         if (localSegregatedChangelog[OTHER_SECTION_HEADING]?.children.length === 0) {
             delete localSegregatedChangelog[OTHER_SECTION_HEADING];
         }
 
-        setAll(localSegregatedChangelog);
+        setAllSegregatedChangelog(localSegregatedChangelog);
     }, [releases]);
 
     const traverseListItems = (
@@ -78,9 +77,10 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                 currentHeading
             );
 
-            const newSection = localSegregatedChangelog[currentHeading] || {
+            const newSection = localSegregatedChangelog[currentHeading] ?? {
                 children: [],
                 displayName: currentHeading,
+                hidden: false,
             };
             newSection.children.push({
                 slug: slugify(item.text),
@@ -119,45 +119,51 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         return tokens;
     };
 
-    // const handleHeadingInput = (
-    //     e: FormEvent<HTMLHeadingElement>,
-    //     heading: string
-    // ) => {
-    //     e.preventDefault();
-    //     const updatedSection = segregatedChangelog[heading]!;
-    //     updatedSection.displayName = e.currentTarget.textContent;
-    //     set(heading, updatedSection);
-    // };
-
-    const handleListItemClick = (
-        e: MouseEvent<HTMLLIElement, globalThis.MouseEvent>,
-        headingKey: string
+    const handleRestoreSectionsClick = (
+        _: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
     ) => {
-        if (!isFocused) {
-            const id = e.currentTarget.id;
-            const section = segregatedChangelog[headingKey]!;
-            const index = section.children.findIndex((item) => item.slug === id);
-            const newSection = { ...section };
-            newSection.children[index]!.selected = !newSection.children[index]!.selected;
-            set(headingKey, newSection);
+        const localSegregatedChangelog: SegregatedChangelog = {};
+        for (const [headingKey, section] of Object.entries(segregatedChangelog)) {
+            localSegregatedChangelog[headingKey] = { ...section, hidden: false };
         }
+        setAllSegregatedChangelog(localSegregatedChangelog);
     };
 
     return (
         <div className={`release-container container px-4 pb-10 ${isFocused ? "focus" : ""}`}>
-            <button
-                type="button"
-                className={`ml-auto mt-2 block w-auto rounded-md px-2 py-1 text-center text-sm font-medium text-white focus:outline-none focus:ring-2 disabled:bg-transparent disabled:font-normal disabled:text-slate-400 ${isFocused
-                        ? "bg-red-700 hover:bg-red-800 focus:ring-red-300"
-                        : "bg-green-700 hover:bg-green-800 focus:ring-green-300"
-                    }`}
-                onClick={() => setIsFocused(!isFocused)}
-                disabled={!focusAvailable}
-            >
-                {isFocused ? "Unfocus" : focusAvailable ? "Focus" : "Select items to focus"}
-            </button>
+            <div className="action-bar sticky top-0 z-10 mb-4 pt-1 backdrop-blur-md">
+                <div className="ml-auto mt-2 flex w-fit items-center gap-2">
+                    {isAnySectionHidden && (
+                        <button
+                            type="button"
+                            className="ml-auto block w-auto rounded-md px-2 py-1 text-center text-xs font-medium text-gray-500 transition-colors hover:text-white"
+                            onClick={handleRestoreSectionsClick}
+                        >
+                            Restore sections
+                        </button>
+                    )}
+                    {focusAvailable ? (
+                        <button
+                            type="button"
+                            className={`block w-auto rounded-md px-2 py-1 text-center text-xs font-medium text-white shadow-md focus:outline-none focus:ring-2 disabled:bg-transparent disabled:font-normal disabled:text-slate-400 ${
+                                isFocused
+                                    ? "bg-red-700 shadow-red-700/50 hover:bg-red-800 focus:ring-red-300"
+                                    : "bg-green-600 shadow-green-600/50 hover:bg-green-500 focus:ring-green-400"
+                            }`}
+                            onClick={() => setIsFocused(!isFocused)}
+                        >
+                            {isFocused ? "Unfocus" : "Focus"}
+                        </button>
+                    ) : (
+                        <p className="w-fit py-1 text-left text-xs text-gray-500">
+                            Select items to focus
+                        </p>
+                    )}
+                </div>
+                <hr className="mt-2 h-px border-0 bg-gray-200 dark:bg-gray-700" />
+            </div>
             {Object.entries(segregatedChangelog).map(
-                ([headingKey, section], i) =>
+                ([headingKey, section]) =>
                     (!isFocused ||
                         (isFocused &&
                             section.children.reduce(
@@ -166,45 +172,23 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                             ))) && (
                         <div
                             className="release-section prose my-2 max-w-full dark:prose-invert"
-                            key={i}
+                            key={headingKey}
+                            ref={autoAnimateRef}
                         >
-                            <div className="flex items-center mb-2.5">
-                                <h3 className="mt-0 mb-0">{section.displayName}</h3>{" "}
-                                {isFocused && (
-                                    <span className="focus-info text-xs ml-4 text-slate-500">
-                                        {/* FOCUSING ON{" "} */}
-                                        <b>
-                                            {section.children.reduce(
-                                                (acc, child) => acc + Number(child.selected),
-                                                0
-                                            )}
-                                        </b>{" "}
-                                        OUT OF <b>{section.children.length}</b> ITEMS
-                                    </span>
-                                )}
-                            </div>
-                            <ul className="release-section-list mt-0" ref={listRef}>
-                                {section.children.map(
-                                    (child) =>
-                                        (!isFocused || (isFocused && child.selected)) && (
-                                            <li
-                                                className={`release-section-list-item ${child.selected ? "selected" : ""
-                                                    } hover:bg-gray-900`}
-                                                key={child.slug}
-                                                id={child.slug}
-                                                onClick={(e) => handleListItemClick(e, headingKey)}
-                                                title={
-                                                    isFocused ? "" : "Click to select for focus"
-                                                }
-                                                dangerouslySetInnerHTML={{
-                                                    __html: DOMPurify.sanitize(
-                                                        marked.parser(child.tokens)
-                                                    ),
-                                                }}
-                                            ></li>
-                                        )
-                                )}
-                            </ul>
+                            <ChangelogContentHeading
+                                section={section}
+                                headingKey={headingKey}
+                                isFocused={isFocused}
+                                setSegregatedChangelog={setSegregatedChangelog}
+                            />
+                            {!section.hidden && (
+                                <ChangelogContentList
+                                    section={section}
+                                    headingKey={headingKey}
+                                    isFocused={isFocused}
+                                    setSegregatedChangelog={setSegregatedChangelog}
+                                />
+                            )}
                         </div>
                     )
             )}
