@@ -1,3 +1,5 @@
+import { Selectable } from "./common";
+
 export type Release = {
     id: number;
     name: string;
@@ -7,3 +9,4 @@ export type Release = {
     draft: true;
     created_at: string;
 };
+export type SelectableRelease = Release & Selectable;

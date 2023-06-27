@@ -1,16 +1,14 @@
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import { useState, useEffect, MouseEvent } from "react";
+import { useState, useEffect } from "react";
 import { marked } from "marked";
 import { useMap } from "react-use";
 import { slugify } from "@/utils/common";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { OTHER_SECTION_HEADING } from "@/constants";
 import { SegregatedChangelog, Release } from "@/types";
-import ChangelogContentHeading from "@/components/ChangelogContentHeading";
-import ChangelogContentList from "@/components/ChangelogContentList";
-
-dayjs.extend(relativeTime);
+import ChangelogContentHeading from "@/components/ChangelogContent/Heading";
+import ChangelogContentList from "@/components/ChangelogContent/List";
+import ChangelogContentActionBar from "./ActionBar";
+import { FloatingFocusButton } from "./FocusButton";
 
 type ChangelogContentProps = {
     releases: Release[];
@@ -23,7 +21,16 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         { set: setSegregatedChangelog, setAll: setAllSegregatedChangelog },
     ] = useMap<SegregatedChangelog>();
     const [isFocused, setIsFocused] = useState<boolean>(false);
-
+    const firstSelectedRelease = releases.length > 0 ? releases[0] : undefined;
+    const lastSelectedRelease = releases.length > 0 ? releases[releases.length - 1] : undefined;
+    let title = "";
+    if (firstSelectedRelease && lastSelectedRelease) {
+        if (firstSelectedRelease.id == lastSelectedRelease.id) {
+            title = firstSelectedRelease.name;
+        } else {
+            title = `${lastSelectedRelease.name} → ${firstSelectedRelease.name}`;
+        }
+    }
     let focusAvailable = false;
     for (const section of Object.values(segregatedChangelog)) {
         if (section.hidden) continue;
@@ -35,13 +42,6 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         }
         if (focusAvailable) break;
         // section.children.sort((a, b) => Number(b.selected) - Number(a.selected))
-    }
-    let isAnySectionHidden = false;
-    for (const section of Object.values(segregatedChangelog)) {
-        if (section.hidden) {
-            isAnySectionHidden = true;
-            break;
-        }
     }
 
     useEffect(() => {
@@ -119,49 +119,16 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         return tokens;
     };
 
-    const handleRestoreSectionsClick = (
-        _: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
-    ) => {
-        const localSegregatedChangelog: SegregatedChangelog = {};
-        for (const [headingKey, section] of Object.entries(segregatedChangelog)) {
-            localSegregatedChangelog[headingKey] = { ...section, hidden: false };
-        }
-        setAllSegregatedChangelog(localSegregatedChangelog);
-    };
-
     return (
-        <div className={`release-container container px-4 pb-10 ${isFocused ? "focus" : ""}`}>
-            <div className="action-bar sticky top-0 z-10 mb-4 pt-1 backdrop-blur-md">
-                <div className="ml-auto mt-2 flex w-fit items-center gap-2">
-                    {isAnySectionHidden && (
-                        <button
-                            type="button"
-                            className="ml-auto block w-auto rounded-md px-2 py-1 text-center text-xs font-medium text-gray-500 transition-colors hover:text-white"
-                            onClick={handleRestoreSectionsClick}
-                        >
-                            Restore sections
-                        </button>
-                    )}
-                    {focusAvailable ? (
-                        <button
-                            type="button"
-                            className={`block w-auto rounded-md px-2 py-1 text-center text-xs font-medium text-white shadow-md focus:outline-none focus:ring-2 disabled:bg-transparent disabled:font-normal disabled:text-slate-400 ${
-                                isFocused
-                                    ? "bg-red-700 shadow-red-700/50 hover:bg-red-800 focus:ring-red-300"
-                                    : "bg-green-600 shadow-green-600/50 hover:bg-green-500 focus:ring-green-400"
-                            }`}
-                            onClick={() => setIsFocused(!isFocused)}
-                        >
-                            {isFocused ? "Unfocus" : "Focus"}
-                        </button>
-                    ) : (
-                        <p className="w-fit py-1 text-left text-xs text-gray-500">
-                            Select items to focus
-                        </p>
-                    )}
-                </div>
-                <hr className="mt-2 h-px border-0 bg-gray-200 dark:bg-gray-700" />
-            </div>
+        <div className={`release-container container pb-10 ${isFocused ? "focus" : ""}`}>
+            <ChangelogContentActionBar
+                title={title}
+                segregatedChangelog={segregatedChangelog}
+                isFocused={isFocused}
+                setIsFocused={setIsFocused}
+                focusAvailable={focusAvailable}
+                setAllSegregatedChangelog={setAllSegregatedChangelog}
+            />
             {Object.entries(segregatedChangelog).map(
                 ([headingKey, section]) =>
                     (!isFocused ||
@@ -192,6 +159,11 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                         </div>
                     )
             )}
+            <FloatingFocusButton
+                isFocused={isFocused}
+                focusAvailable={focusAvailable}
+                handleFocusClick={() => setIsFocused(!isFocused)}
+            />
         </div>
     );
 };

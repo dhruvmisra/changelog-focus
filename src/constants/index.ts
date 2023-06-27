@@ -1,1 +1,3 @@
 export const OTHER_SECTION_HEADING = "Other";
+export const FLOATING_FOCUS_BUTTON_HIDE_TIMEOUT = 3000
+export const RELEASES_FETCH_LIMIT=10
