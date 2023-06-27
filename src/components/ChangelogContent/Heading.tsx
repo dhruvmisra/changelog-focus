@@ -1,5 +1,5 @@
 import { type MouseEvent } from "react";
-import { SegregatedChangelogSection, SegregatedChangelog } from "@/types";
+import type { SegregatedChangelogSection, SegregatedChangelog } from "@/types";
 
 type ChangelogContentHeadingProps = {
     section: SegregatedChangelogSection;

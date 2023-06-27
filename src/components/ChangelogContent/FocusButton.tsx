@@ -46,11 +46,11 @@ export const FloatingFocusButton = ({
             setHasFocusBeenAvailable(true);
             setExpanded(true);
         }
-    }, [focusAvailable]);
+    }, [focusAvailable, hasFocusBeenAvailable]);
 
     useEffect(() => {
         reset();
-    }, [expanded]);
+    }, [expanded, reset]);
 
     const handleFloatingFocusClick = () => {
         if (expanded) {

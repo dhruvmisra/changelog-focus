@@ -1,4 +1,4 @@
-import { SegregatedChangelog } from "@/types";
+import type { SegregatedChangelog } from "@/types";
 import { FocusButton } from "./FocusButton";
 
 type ChangelogContentActionBarProps = {

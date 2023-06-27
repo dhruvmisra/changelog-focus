@@ -1,14 +1,15 @@
-import { type NextPage } from "next";
+import type { NextPage } from "next";
 import { useQuery } from "@tanstack/react-query";
 import { GitHub } from "@/utils/github";
+import type { AxiosError } from "axios";
 
 import Head from "next/head";
-import { FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ChangelogContent from "@/components/ChangelogContent";
 import { GITHUB_BASE_URL } from "@/constants/endpoints";
-import { Release, SelectableRelease } from "@/types";
+import type { Release, SelectableRelease } from "@/types";
 import ReleaseSelection from "@/components/ReleaseSelection";
 import { RELEASES_FETCH_LIMIT } from "@/constants";
 
@@ -38,13 +39,13 @@ const Home: NextPage = () => {
     const {
         data: releases,
         refetch: refetchReleases,
-        isFetched: releasesFetched,
         isInitialLoading,
         isRefetching,
     } = useQuery<Release[]>([`releases_${repositoryLink}`], getReleases, {
         enabled: false,
-        onError: (error: any) => {
-            const requestSpecificError = error.message || "";
+        onError: (error: unknown) => {
+            const axiosError = error as AxiosError;
+            const requestSpecificError: string = axiosError.message;
             // const repositoryError = error.data?.zodError?.fieldErrors.repositoryLink;
             // toast.error(`Oops, somehting went wrong! ${repositoryError?.join(", ")}`);
             toast.error(`Oops, somehting went wrong! ${requestSpecificError}`);
@@ -72,10 +73,10 @@ const Home: NextPage = () => {
         setRepositoryLink(e.currentTarget.value);
     };
 
-    const handleReleasesSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    const handleReleasesSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!releases) {
-            await refetchReleases();
+            void refetchReleases();
         }
     };
 
@@ -137,7 +138,7 @@ const Home: NextPage = () => {
                 </div>
 
                 <div className="container block w-full gap-4 sm:flex" ref={containerRef}>
-                    {releasesFetched && (
+                    {releases && (
                         <div className="grow">
                             <ReleaseSelection
                                 releases={filteredReleases}

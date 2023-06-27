@@ -4,7 +4,7 @@ import { useMap } from "react-use";
 import { slugify } from "@/utils/common";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { OTHER_SECTION_HEADING } from "@/constants";
-import { SegregatedChangelog, Release } from "@/types";
+import type { SegregatedChangelog, Release } from "@/types";
 import ChangelogContentHeading from "@/components/ChangelogContent/Heading";
 import ChangelogContentList from "@/components/ChangelogContent/List";
 import ChangelogContentActionBar from "./ActionBar";
@@ -13,6 +13,8 @@ import { FloatingFocusButton } from "./FocusButton";
 type ChangelogContentProps = {
     releases: Release[];
 };
+
+type TraversableToken = marked.Token & { tokens?: any };
 
 const ChangelogContent = ({ releases }: ChangelogContentProps) => {
     const [autoAnimateRef] = useAutoAnimate();
@@ -93,14 +95,14 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
     };
 
     const traverseTokensTree = (
-        tokens: marked.Token[],
+        tokens: TraversableToken[],
         localSegregatedChangelog: SegregatedChangelog,
         currentHeading: string
     ): marked.Token[] => {
         for (const token of tokens) {
             if (token.tokens) {
                 token.tokens = traverseTokensTree(
-                    token.tokens,
+                    token.tokens as TraversableToken[],
                     localSegregatedChangelog,
                     currentHeading
                 );

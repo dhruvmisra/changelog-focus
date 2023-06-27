@@ -1,4 +1,4 @@
-import { marked } from "marked";
+import type { marked } from "marked";
 
 export type SegregatedChangelogSectionChild = marked.Token & {
     slug: string;

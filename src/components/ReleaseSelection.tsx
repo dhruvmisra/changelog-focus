@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { FormEvent } from "react";
-import { SelectableRelease } from "@/types";
+import type { FormEvent } from "react";
+import type { SelectableRelease } from "@/types";
 
 dayjs.extend(relativeTime);
 
@@ -13,8 +13,8 @@ type ReleaseSelectionProps = {
 const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
     const handleReleaseSelection = (e: FormEvent<HTMLInputElement>, releaseId: number) => {
         e.preventDefault();
-        let newReleases = [...releases];
-        let index = newReleases.findIndex((release) => release.id == releaseId);
+        const newReleases = [...releases];
+        const index = newReleases.findIndex((release) => release.id == releaseId);
 
         if (index === -1) {
             return;
@@ -63,13 +63,14 @@ const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
             <p className="mb-4 text-xs text-gray-500">Select a range to view changelog</p>
             <ul>
                 {releases?.map((release) => (
-                    <li key={`${release.id}-${release.selected}`}>
+                    <li key={`${release.id}-${String(release.selected)}`}>
                         <input
                             type="checkbox"
                             id={release.name}
                             value={release.id}
                             className="peer hidden"
                             checked={release.selected}
+                            aria-checked={release.selected}
                             onChange={(e) => handleReleaseSelection(e, release.id)}
                         />
                         <label

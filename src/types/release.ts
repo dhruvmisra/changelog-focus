@@ -1,4 +1,4 @@
-import { Selectable } from "./common";
+import type { Selectable } from "./common";
 
 export type Release = {
     id: number;

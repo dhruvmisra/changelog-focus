@@ -2,7 +2,7 @@ import { type MouseEvent } from "react";
 import { marked } from "marked";
 import * as DOMPurify from "dompurify";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { SegregatedChangelogSection, SegregatedChangelog } from "@/types";
+import type { SegregatedChangelogSection, SegregatedChangelog } from "@/types";
 
 type ChangelogContentListProps = {
     section: SegregatedChangelogSection;
