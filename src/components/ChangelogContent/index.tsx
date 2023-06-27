@@ -161,11 +161,13 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                         </div>
                     )
             )}
-            <FloatingFocusButton
-                isFocused={isFocused}
-                focusAvailable={focusAvailable}
-                handleFocusClick={() => setIsFocused(!isFocused)}
-            />
+            {focusAvailable && (
+                <FloatingFocusButton
+                    isFocused={isFocused}
+                    focusAvailable={focusAvailable}
+                    handleFocusClick={() => setIsFocused(!isFocused)}
+                />
+            )}
         </div>
     );
 };

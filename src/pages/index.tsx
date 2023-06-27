@@ -91,6 +91,11 @@ const Home: NextPage = () => {
                 <div className="container flex flex-col items-center justify-center py-4 ">
                     <h1 className="py-8 text-5xl font-extrabold tracking-tight text-white drop-shadow-md sm:text-[5rem]">
                         Changelog <span className="text-violet-600 drop-shadow-md">Focus</span>
+                        {process.env.NEXT_PUBLIC_PRE_RELEASE && (
+                            <span className="prerelease-tag text-sm font-bold tracking-normal">
+                                {process.env.NEXT_PUBLIC_PRE_RELEASE}
+                            </span>
+                        )}
                     </h1>
 
                     <form className="relative w-full" onSubmit={handleReleasesSubmit}>
