@@ -33,6 +33,7 @@
     "devDependencies": {
         "@types/dompurify": "^3.0.2",
         "@types/eslint": "^8.21.3",
+        "@types/gtag.js": "^0.0.12",
         "@types/marked": "^5.0.0",
         "@types/node": "^18.15.5",
         "@types/prettier": "^2.7.2",
