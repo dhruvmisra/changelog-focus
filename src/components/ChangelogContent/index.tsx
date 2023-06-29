@@ -14,7 +14,7 @@ type ChangelogContentProps = {
     releases: Release[];
 };
 
-type TraversableToken = marked.Token & { tokens?: any };
+type TraversableToken = marked.Token & { tokens?: marked.Token[] };
 
 const ChangelogContent = ({ releases }: ChangelogContentProps) => {
     const [autoAnimateRef] = useAutoAnimate();
@@ -65,7 +65,7 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         }
 
         setAllSegregatedChangelog(localSegregatedChangelog);
-    }, [releases]);
+    }, [releases, setAllSegregatedChangelog]);
 
     const traverseListItems = (
         listItems: marked.Tokens.ListItem[],

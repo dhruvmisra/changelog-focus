@@ -32,6 +32,7 @@ const config = {
             "warn",
             { argsIgnorePattern: "^_" },
         ],
+        "@typescript-eslint/no-non-null-assertion": "off"
     },
 };
 

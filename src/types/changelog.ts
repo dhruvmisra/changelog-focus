@@ -3,7 +3,7 @@ import type { marked } from "marked";
 export type SegregatedChangelogSectionChild = marked.Token & {
     slug: string;
     selected: boolean;
-    tokens: any[];
+    tokens: marked.Token[];
 };
 
 export type SegregatedChangelogSection = {

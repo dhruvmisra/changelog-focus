@@ -58,7 +58,7 @@ const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
     };
 
     return (
-        <div className="releases-container w-full h-fit pt-4 mb-8">
+        <div className="releases-container mb-8 h-fit w-full pt-4">
             <h3 className="mb-1 font-medium text-white">Releases</h3>
             <p className="mb-4 text-xs text-gray-500">Select a range to view changelog</p>
             <ul>
@@ -70,13 +70,13 @@ const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
                             value={release.id}
                             className="peer hidden"
                             checked={release.selected}
-                            aria-checked={release.selected}
                             onChange={(e) => handleReleaseSelection(e, release.id)}
                         />
                         <label
                             htmlFor={release.name}
                             className="inline-flex w-full cursor-pointer flex-wrap items-center justify-between rounded-lg border border-gray-200 bg-white p-2.5 text-gray-500 hover:bg-gray-50 hover:text-gray-600 peer-checked:border-violet-600 peer-checked:text-gray-600 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-gray-300 dark:peer-checked:text-gray-300"
                             tabIndex={0}
+                            aria-checked={release.selected}
                             role="checkbox"
                         >
                             <div className="block">
