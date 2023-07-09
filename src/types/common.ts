@@ -18,3 +18,8 @@ export interface AppConfiguration {
 export type Selectable = {
     selected: boolean;
 };
+
+export type Searchable = {
+    matched: boolean;
+    matchScore: number;
+};

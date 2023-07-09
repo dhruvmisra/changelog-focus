@@ -1,8 +1,9 @@
 import { type MouseEvent } from "react";
-import type { SegregatedChangelogSection, SegregatedChangelog } from "@/types";
+import type { SegregatedChangelogSection, SegregatedChangelog, ChangelogMetadata } from "@/types";
 
 type ChangelogContentHeadingProps = {
     section: SegregatedChangelogSection;
+    changelogMetadata: ChangelogMetadata;
     headingKey: string;
     isFocused: boolean;
     setSegregatedChangelog: <K extends string | number>(
@@ -15,6 +16,7 @@ const ChangelogContentHeading = ({
     section,
     headingKey,
     isFocused,
+    changelogMetadata,
     setSegregatedChangelog,
 }: ChangelogContentHeadingProps) => {
     // const handleHeadingInput = (
@@ -47,7 +49,10 @@ const ChangelogContentHeading = ({
             {isFocused && (
                 <span className="focus-info text-xs text-slate-500">
                     <b>
-                        {section.children.reduce((acc, child) => acc + Number(child.selected), 0)}
+                        {section.children.reduce(
+                            (acc, child) => acc + Number(changelogMetadata[child.id]!.selected),
+                            0
+                        )}
                     </b>{" "}
                     OUT OF <b>{section.children.length}</b> ITEMS
                 </span>

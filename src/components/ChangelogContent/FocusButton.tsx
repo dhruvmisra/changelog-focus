@@ -39,7 +39,7 @@ export const FloatingFocusButton = ({
             setExpanded(false);
         }
     };
-    const [isReady, cancel, reset] = useTimeoutFn(collapse, FLOATING_FOCUS_BUTTON_HIDE_TIMEOUT);
+    const [, , reset] = useTimeoutFn(collapse, FLOATING_FOCUS_BUTTON_HIDE_TIMEOUT);
 
     useEffect(() => {
         if (focusAvailable && !hasFocusBeenAvailable) {

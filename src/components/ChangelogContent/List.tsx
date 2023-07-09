@@ -2,47 +2,61 @@ import { type MouseEvent } from "react";
 import { marked } from "marked";
 import * as DOMPurify from "dompurify";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import type { SegregatedChangelogSection, SegregatedChangelog } from "@/types";
+import type {
+    SegregatedChangelogSection,
+    SegregatedChangelogSectionChild,
+    ChangelogMetadata,
+} from "@/types";
 
 type ChangelogContentListProps = {
     section: SegregatedChangelogSection;
-    headingKey: string;
+    changelogMetadata: ChangelogMetadata;
     isFocused: boolean;
-    setSegregatedChangelog: <K extends string | number>(
-        key: K,
-        value: SegregatedChangelog[K]
-    ) => void;
+    setChangelogMetadata: <K extends string | number>(key: K, value: ChangelogMetadata[K]) => void;
 };
 
 const ChangelogContentList = ({
     section,
-    headingKey,
+    changelogMetadata,
     isFocused,
-    setSegregatedChangelog,
+    setChangelogMetadata,
 }: ChangelogContentListProps) => {
     const [autoAnimateRef] = useAutoAnimate();
+    const sortedChildren = section.children.sort(
+        (a, b) => changelogMetadata[a.id]!.matchScore - changelogMetadata[b.id]!.matchScore
+    );
 
     const handleListItemClick = (e: MouseEvent<HTMLLIElement, globalThis.MouseEvent>) => {
         if (!isFocused) {
             const id = e.currentTarget.id;
-            const index = section.children.findIndex((item) => item.slug === id);
-            const newSection = { ...section };
-            newSection.children[index]!.selected = !newSection.children[index]!.selected;
-            setSegregatedChangelog(headingKey, newSection);
+            const newMetadata = { ...changelogMetadata[id]! };
+            newMetadata.selected = !newMetadata.selected;
+            setChangelogMetadata(id, newMetadata);
         }
+    };
+
+    const isChildVisible = (child: SegregatedChangelogSectionChild) => {
+        const isSelected = changelogMetadata[child.id]!.selected;
+        const isMatchingSearch = changelogMetadata[child.id]!.matched;
+
+        if (isFocused) {
+            return isSelected && isMatchingSearch;
+        }
+
+        return isMatchingSearch;
     };
 
     return (
         <ul className="release-section-list mt-0" ref={autoAnimateRef}>
-            {section.children.map(
+            {sortedChildren.map(
                 (child) =>
-                    (!isFocused || (isFocused && child.selected)) && (
+                    isChildVisible(child) && (
                         <li
                             className={`release-section-list-item ${
-                                child.selected ? "selected" : ""
+                                changelogMetadata[child.id]!.selected ? "selected" : ""
                             } hover:bg-gray-900`}
-                            key={child.slug}
-                            id={child.slug}
+                            key={child.id}
+                            id={child.id}
                             onClick={handleListItemClick}
                             title={isFocused ? "" : "Click to select for focus"}
                             dangerouslySetInnerHTML={{
