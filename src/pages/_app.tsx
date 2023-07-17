@@ -11,8 +11,10 @@ import "@/styles/globals.css";
 const MyApp: AppType = ({ Component, pageProps }) => {
     const router = useRouter();
     useEffect(() => {
-        const handleRouteChange = (url: URL) => {
-            gtag.pageView(url);
+        const handleRouteChange = (url: URL, { shallow }: { shallow: boolean }) => {
+            if (!shallow) {
+                gtag.pageView(url);
+            }
         };
         router.events.on("routeChangeComplete", handleRouteChange);
         return () => {

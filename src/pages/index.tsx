@@ -1,9 +1,10 @@
+import Head from "next/head";
 import type { NextPage } from "next";
+import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { GitHub } from "@/utils/github";
 import type { AxiosError } from "axios";
 
-import Head from "next/head";
 import { type FormEvent, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -12,8 +13,10 @@ import { GITHUB_BASE_URL } from "@/constants/endpoints";
 import type { Release, SelectableRelease } from "@/types";
 import ReleaseSelection from "@/components/ReleaseSelection";
 import { RELEASES_FETCH_LIMIT } from "@/constants";
+import { updateQueryParams, urlDecode, urlEncode } from "@/utils/common";
 
 const Home: NextPage = () => {
+    const router = useRouter();
     const [mainRef] = useAutoAnimate();
     const [containerRef] = useAutoAnimate();
     const [repositoryLink, setRepositoryLink] = useState("");
@@ -46,8 +49,6 @@ const Home: NextPage = () => {
         onError: (error: unknown) => {
             const axiosError = error as AxiosError;
             const requestSpecificError: string = axiosError.message;
-            // const repositoryError = error.data?.zodError?.fieldErrors.repositoryLink;
-            // toast.error(`Oops, somehting went wrong! ${repositoryError?.join(", ")}`);
             toast.error(`Oops, somehting went wrong! ${requestSpecificError}`);
         },
         retry: false,
@@ -55,6 +56,16 @@ const Home: NextPage = () => {
     const isLoading = isInitialLoading || isRefetching;
     const [filteredReleases, setFilteredReleases] = useState<SelectableRelease[]>([]);
     const selectedReleases = filteredReleases.filter((release) => release.selected);
+
+    useEffect(() => {
+        if (!router.isReady) return;
+
+        const { link } = router.query;
+        if (link) {
+            setRepositoryLink(urlDecode(link as string));
+        }
+        console.log(urlEncode(link as string));
+    }, [router.isReady]);
 
     useEffect(() => {
         const localReleases: SelectableRelease[] = [];
@@ -65,6 +76,7 @@ const Home: NextPage = () => {
                     ...release,
                 });
             }
+            updateQueryParams(router, { link: urlEncode(repositoryLink) });
         }
         setFilteredReleases(localReleases);
     }, [releases]);
@@ -75,6 +87,7 @@ const Home: NextPage = () => {
 
     const handleReleasesSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        updateQueryParams(router, { link: urlEncode(repositoryLink) });
         if (!releases) {
             void refetchReleases();
         }
