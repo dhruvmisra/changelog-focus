@@ -118,7 +118,7 @@ const Home: NextPage = () => {
                 void refetchGithubReleases();
                 break;
             case FetchMechanism.SCRAPING:
-                refetchScrapedReleases();
+                void refetchScrapedReleases();
                 break;
         }
     };

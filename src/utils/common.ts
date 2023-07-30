@@ -20,7 +20,7 @@ export const updateQueryParams = (
         ...router.query,
         ...queryParams,
     };
-    router.push({ query: query }, undefined, { shallow: true });
+    void router.push({ query: query }, undefined, { shallow: true });
 };
 
 export const base64Encode = (text: string): string => {
