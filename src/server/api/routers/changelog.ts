@@ -103,6 +103,7 @@ export const changelogRouter = createTRPCRouter({
             try {
                 releases = await scrapeReleasesFromPage(input.link);
             } catch (error) {
+                console.log(error)
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "An error occurred while scraping the changelog.",
