@@ -2,17 +2,42 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-import puppeteer from "puppeteer";
+import type { PuppeteerNode, Viewport } from "puppeteer-core";
 import TurndownService from "turndown";
-import { Release } from "@/types";
+import type { Release } from "@/types";
+
+let chrome: {
+    defaultViewport?: Viewport;
+    executablePath?: string | Promise<string>;
+} = {};
+let puppeteer: PuppeteerNode;
+
+const setGlobals = async () => {
+    if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+        // running on the Vercel platform
+        chrome = await import("chrome-aws-lambda").then((m) => m.default);
+        puppeteer = await import("puppeteer-core").then((m) => m.default);
+    } else {
+        // running locally
+        // @ts-ignore
+        puppeteer = await import("puppeteer").then((m) => m.default);
+    }
+};
+
+type HeadingsFollowedByLists = {
+    [Key: string]: string;
+};
 
 const scrapeReleasesFromPage = async (url: string) => {
     const releases: Release[] = [];
 
     const turndownService = new TurndownService();
     const browser = await puppeteer.launch({
+        args: ["--hide-scrollbars", "--disable-web-security"],
+        defaultViewport: chrome.defaultViewport,
+        executablePath: await chrome.executablePath,
         headless: "new",
-        defaultViewport: null,
+        ignoreHTTPSErrors: true,
     });
 
     const page = await browser.newPage();
@@ -21,7 +46,7 @@ const scrapeReleasesFromPage = async (url: string) => {
     });
 
     // Get page data
-    const headingsFollowedByLists = await page.evaluate(() => {
+    const headingsFollowedByLists: HeadingsFollowedByLists = await page.evaluate(() => {
         function isSemanticVersion(text: string): boolean {
             // Regular expression to check if the text matches a semantic version pattern (e.g., 1.0.0)
             const semanticVersionPattern = /\d+\.\d+\.\d+/;
@@ -58,9 +83,7 @@ const scrapeReleasesFromPage = async (url: string) => {
 
         function findSemanticVersionHeadingsAndSiblings() {
             const headings = document.querySelectorAll("h1, h2, h3, h4, h5, h6");
-            const result: {
-                [Key: string]: string;
-            } = {};
+            const result: HeadingsFollowedByLists = {};
 
             for (const heading of headings) {
                 const headingText = heading.textContent!.trim();
@@ -99,11 +122,12 @@ export const changelogRouter = createTRPCRouter({
     getScrapedReleases: publicProcedure
         .input(z.object({ link: z.string().url() }))
         .query(async ({ input }) => {
+            await setGlobals();
             let releases = [];
             try {
                 releases = await scrapeReleasesFromPage(input.link);
             } catch (error) {
-                console.log(error)
+                console.log(error);
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: "An error occurred while scraping the changelog.",
