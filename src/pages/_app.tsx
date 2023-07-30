@@ -24,7 +24,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
 
     return (
         <>
-            <Toaster />
+            <Toaster position="bottom-center" />
             <Component {...pageProps} />
         </>
     );

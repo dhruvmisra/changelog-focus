@@ -5,8 +5,8 @@ export type Release = {
     name: string;
     body: string;
     url: string;
-    prerelease: true;
-    draft: true;
+    prerelease: boolean;
+    draft: boolean;
     created_at: string;
 };
 export type SelectableRelease = Release & Selectable;

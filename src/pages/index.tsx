@@ -11,17 +11,40 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import ChangelogContent from "@/components/ChangelogContent";
 import { GITHUB_BASE_URL } from "@/constants/endpoints";
 import type { Release, SelectableRelease } from "@/types";
+import { FetchMechanism } from "@/types";
 import ReleaseSelection from "@/components/ReleaseSelection";
 import { RELEASES_FETCH_LIMIT } from "@/constants";
-import { updateQueryParams, urlDecode, urlEncode } from "@/utils/common";
+import { getFetchMechanism, updateQueryParams, urlDecode, urlEncode } from "@/utils/common";
+import { api } from "@/utils/api";
 
 const Home: NextPage = () => {
     const router = useRouter();
     const [mainRef] = useAutoAnimate();
     const [containerRef] = useAutoAnimate();
+    const [formRef] = useAutoAnimate();
     const [repositoryLink, setRepositoryLink] = useState("");
+    const [fetchMechanism, setFetchMechanism] = useState<FetchMechanism | null>(null);
 
-    const getReleases = async () => {
+    const {
+        data: scrapedReleases,
+        refetch: refetchScrapedReleases,
+        isInitialLoading: isInitialLoadingScrapedReleases,
+        isRefetching: isRefreshingScrapedReleases,
+    } = api.changelog.getScrapedReleases.useQuery(
+        {
+            link: repositoryLink,
+        },
+        {
+            enabled: false,
+            retry: false,
+            onError: (error: unknown) => {
+                console.log(error);
+                toast.error(`Oops, somehting went wrong!`);
+            },
+        }
+    );
+
+    const getGitHubReleases = async () => {
         const splitUrl = repositoryLink.split(GITHUB_BASE_URL);
         if (splitUrl.length < 2) {
             throw new Error("Not a GitHub URL");
@@ -40,32 +63,31 @@ const Home: NextPage = () => {
     };
 
     const {
-        data: releases,
-        refetch: refetchReleases,
-        isInitialLoading,
-        isRefetching,
-    } = useQuery<Release[]>([`releases_${repositoryLink}`], getReleases, {
+        data: githubReleases,
+        refetch: refetchGithubReleases,
+        isInitialLoading: isInitialLoadingGithubReleases,
+        isRefetching: isRefetchingGithubReleases,
+    } = useQuery<Release[]>([`releases_${repositoryLink}`], getGitHubReleases, {
         enabled: false,
+        retry: false,
         onError: (error: unknown) => {
             const axiosError = error as AxiosError;
             const requestSpecificError: string = axiosError.message;
             toast.error(`Oops, somehting went wrong! ${requestSpecificError}`);
         },
-        retry: false,
     });
-    const isLoading = isInitialLoading || isRefetching;
+    const releases = scrapedReleases || githubReleases;
+    const isLoading =
+        isInitialLoadingGithubReleases ||
+        isRefetchingGithubReleases ||
+        isInitialLoadingScrapedReleases ||
+        isRefreshingScrapedReleases;
     const [filteredReleases, setFilteredReleases] = useState<SelectableRelease[]>([]);
     const selectedReleases = filteredReleases.filter((release) => release.selected);
 
     useEffect(() => {
-        if (!router.isReady) return;
-
-        const { link } = router.query;
-        if (link) {
-            setRepositoryLink(urlDecode(link as string));
-        }
-        console.log(urlEncode(link as string));
-    }, [router.isReady]);
+        setFetchMechanism(null);
+    }, [repositoryLink]);
 
     useEffect(() => {
         const localReleases: SelectableRelease[] = [];
@@ -79,7 +101,27 @@ const Home: NextPage = () => {
             updateQueryParams(router, { link: urlEncode(repositoryLink) });
         }
         setFilteredReleases(localReleases);
-    }, [releases]);
+    }, [scrapedReleases, githubReleases]);
+
+    useEffect(() => {
+        if (!router.isReady) return;
+
+        const { link } = router.query;
+        if (link) {
+            setRepositoryLink(urlDecode(link as string));
+        }
+    }, [router.isReady]);
+
+    const getReleases = (mechanism: FetchMechanism) => {
+        switch (mechanism) {
+            case FetchMechanism.GITHUB:
+                void refetchGithubReleases();
+                break;
+            case FetchMechanism.SCRAPING:
+                refetchScrapedReleases();
+                break;
+        }
+    };
 
     const handleRepositoryLinkChange = (e: FormEvent<HTMLInputElement>) => {
         setRepositoryLink(e.currentTarget.value);
@@ -88,9 +130,9 @@ const Home: NextPage = () => {
     const handleReleasesSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         updateQueryParams(router, { link: urlEncode(repositoryLink) });
-        if (!releases) {
-            void refetchReleases();
-        }
+        const mechanism = getFetchMechanism(repositoryLink);
+        setFetchMechanism(mechanism);
+        getReleases(mechanism);
     };
 
     return (
@@ -111,7 +153,11 @@ const Home: NextPage = () => {
                         )}
                     </h1>
 
-                    <form className="relative w-full" onSubmit={handleReleasesSubmit}>
+                    <form
+                        className="relative w-full"
+                        onSubmit={handleReleasesSubmit}
+                        ref={formRef}
+                    >
                         <input
                             type="text"
                             id="repository-link"
@@ -152,18 +198,44 @@ const Home: NextPage = () => {
                             )}
                             <span className="sr-only">Search</span>
                         </button>
+                        {fetchMechanism === FetchMechanism.GITHUB && (
+                            <p
+                                className="rounded-sm bg-[#14191d] text-center text-xs font-semibold uppercase tracking-wide text-gray-400 mt-1"
+                                title="Scraping page to fetch releases"
+                            >
+                                GitHub
+                            </p>
+                        )}
+                        {fetchMechanism === FetchMechanism.SCRAPING && (
+                            <p
+                                className="rounded-sm bg-yellow-500 text-center text-xs font-semibold uppercase tracking-wide text-yellow-900 mt-1"
+                                title="Scraping page to fetch releases"
+                            >
+                                Scraping - Experimental
+                            </p>
+                        )}
                     </form>
                 </div>
 
                 <div className="container block w-full gap-4 sm:flex" ref={containerRef}>
-                    {releases && (
-                        <div className="grow">
-                            <ReleaseSelection
-                                releases={filteredReleases}
-                                setReleases={setFilteredReleases}
-                            />
-                        </div>
-                    )}
+                    {releases &&
+                        (releases.length > 0 ? (
+                            <div className="grow">
+                                <ReleaseSelection
+                                    releases={filteredReleases}
+                                    setReleases={setFilteredReleases}
+                                />
+                            </div>
+                        ) : (
+                            <div className="grow">
+                                <p
+                                    className="mt-6 rounded-lg border border-red-600 bg-red-600/40 p-2 text-center text-sm text-red-100"
+                                    title="Scraping page to fetch releases"
+                                >
+                                    Could not find releases. Please verify the link.
+                                </p>
+                            </div>
+                        ))}
                     {selectedReleases.length > 0 && (
                         <div className="grow basis-3/5">
                             <ChangelogContent releases={selectedReleases} />

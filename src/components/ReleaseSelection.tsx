@@ -82,11 +82,13 @@ const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
                             <div className="block">
                                 <div className="text-md font-semibold">{release.name}</div>
                             </div>
-                            <div className="block">
-                                <div className="text-sm text-gray-700">
-                                    {`${dayjs(release.created_at).fromNow()}`}
+                            {release.created_at && (
+                                <div className="block">
+                                    <div className="text-sm text-gray-700">
+                                        {`${dayjs(release.created_at).fromNow()}`}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </label>
                     </li>
                 ))}
