@@ -2,27 +2,26 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import { TRPCError } from "@trpc/server";
-import type { PuppeteerNode, Viewport } from "puppeteer-core";
+import puppeteer from "puppeteer-core";
 import TurndownService from "turndown";
 import type { Release } from "@/types";
+import chromium from "@sparticuz/chromium-min";
 
-let chrome: {
-    defaultViewport?: Viewport;
-    executablePath?: string | Promise<string>;
-} = {};
-let puppeteer: PuppeteerNode;
+chromium.setGraphicsMode = false;
 
-const setGlobals = async () => {
-    if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-        // running on the Vercel platform
-        chrome = await import("chrome-aws-lambda").then((m) => m.default);
-        puppeteer = await import("puppeteer-core").then((m) => m.default);
-    } else {
-        // running locally
-        // @ts-ignore
-        puppeteer = await import("puppeteer").then((m) => m.default);
-    }
-};
+// let puppeteer: PuppeteerNode;
+
+// const setGlobals = async () => {
+//     if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+//         // running on the Vercel platform
+//         chrome = await import("chrome-aws-lambda").then((m) => m.default);
+//         puppeteer = await import("puppeteer-core").then((m) => m.default);
+//     } else {
+//         // running locally
+//         // @ts-ignore
+//         puppeteer = await import("puppeteer").then((m) => m.default);
+//     }
+// };
 
 type HeadingsFollowedByLists = {
     [Key: string]: string;
@@ -33,10 +32,10 @@ const scrapeReleasesFromPage = async (url: string) => {
 
     const turndownService = new TurndownService();
     const browser = await puppeteer.launch({
-        args: ["--hide-scrollbars", "--disable-web-security"],
-        defaultViewport: chrome.defaultViewport,
-        executablePath: await chrome.executablePath,
-        headless: "new",
+        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath("https://github.com/Sparticuz/chromium/releases/download/v115.0.0/chromium-v115.0.0-pack.tar"),
+        headless: chromium.headless,
         ignoreHTTPSErrors: true,
     });
 
@@ -122,7 +121,6 @@ export const changelogRouter = createTRPCRouter({
     getScrapedReleases: publicProcedure
         .input(z.object({ link: z.string().url() }))
         .query(async ({ input }) => {
-            await setGlobals();
             let releases = [];
             try {
                 releases = await scrapeReleasesFromPage(input.link);
