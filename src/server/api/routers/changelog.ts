@@ -5,23 +5,7 @@ import { TRPCError } from "@trpc/server";
 import puppeteer from "puppeteer-core";
 import TurndownService from "turndown";
 import type { Release } from "@/types";
-import chromium from "@sparticuz/chromium-min";
-
-chromium.setGraphicsMode = false;
-
-// let puppeteer: PuppeteerNode;
-
-// const setGlobals = async () => {
-//     if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-//         // running on the Vercel platform
-//         chrome = await import("chrome-aws-lambda").then((m) => m.default);
-//         puppeteer = await import("puppeteer-core").then((m) => m.default);
-//     } else {
-//         // running locally
-//         // @ts-ignore
-//         puppeteer = await import("puppeteer").then((m) => m.default);
-//     }
-// };
+import chromium from "@sparticuz/chromium";
 
 type HeadingsFollowedByLists = {
     [Key: string]: string;
@@ -32,9 +16,9 @@ const scrapeReleasesFromPage = async (url: string) => {
 
     const turndownService = new TurndownService();
     const browser = await puppeteer.launch({
-        args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+        args: chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath("https://github.com/Sparticuz/chromium/releases/download/v115.0.0/chromium-v115.0.0-pack.tar"),
+        executablePath: await chromium.executablePath(),
         headless: chromium.headless,
         ignoreHTTPSErrors: true,
     });
