@@ -3,8 +3,9 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev:sst": "sst dev",
-        "dev": "sst bind next dev",
+        "dev-stack:sst": "sst dev",
+        "dev:sst": "sst bind next dev",
+        "dev": "next dev",
         "lint": "next lint",
         "build": "next build",
         "build:prod": "sst build --stage prod",
@@ -20,6 +21,7 @@
     },
     "dependencies": {
         "@formkit/auto-animate": "^0.7.0",
+        "@sparticuz/chromium": "^115.0.0",
         "@t3-oss/env-nextjs": "^0.2.1",
         "@tailwindcss/typography": "^0.5.9",
         "@tanstack/react-query": "^4.28.0",
@@ -33,6 +35,7 @@
         "fuse.js": "^6.6.2",
         "marked": "^5.0.3",
         "next": "^13.4.1",
+        "nprogress": "^0.2.0",
         "puppeteer-core": "19.4.1",
         "react": "18.2.0",
         "react-dom": "18.2.0",
@@ -43,12 +46,12 @@
         "zod": "^3.21.4"
     },
     "devDependencies": {
-        "@sparticuz/chromium": "^115.0.0",
         "@types/dompurify": "^3.0.2",
         "@types/eslint": "^8.21.3",
         "@types/gtag.js": "^0.0.12",
         "@types/marked": "^5.0.0",
         "@types/node": "^18.15.5",
+        "@types/nprogress": "^0.2.0",
         "@types/prettier": "^2.7.2",
         "@types/puppeteer-core": "^7.0.4",
         "@types/react": "^18.0.28",

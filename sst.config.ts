@@ -1,5 +1,5 @@
 import { SSTConfig } from "sst";
-import { NextjsSite } from "sst/constructs";
+import { NextjsSiteWithoutRevalidation } from "./stack/NextjsSite";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 
@@ -13,7 +13,7 @@ export default {
     },
     stacks(app) {
         app.stack(function Site({ stack }) {
-            const site = new NextjsSite(stack, "web-app", {
+            const site = new NextjsSiteWithoutRevalidation(stack, "web-app", {
                 cdk: {
                     server: {
                         architecture: lambda.Architecture.X86_64,

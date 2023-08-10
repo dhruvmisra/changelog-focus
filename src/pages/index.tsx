@@ -13,6 +13,7 @@ import { GITHUB_BASE_URL } from "@/constants/endpoints";
 import type { Release, SelectableRelease } from "@/types";
 import { FetchMechanism } from "@/types";
 import ReleaseSelection from "@/components/ReleaseSelection";
+import NProgress from "nprogress";
 import { RELEASES_FETCH_LIMIT } from "@/constants";
 import { getFetchMechanism, updateQueryParams, urlDecode, urlEncode } from "@/utils/common";
 import { api } from "@/utils/api";
@@ -84,6 +85,12 @@ const Home: NextPage = () => {
         isRefreshingScrapedReleases;
     const [filteredReleases, setFilteredReleases] = useState<SelectableRelease[]>([]);
     const selectedReleases = filteredReleases.filter((release) => release.selected);
+
+    if (isLoading) {
+        NProgress.start();
+    } else {
+        NProgress.done();
+    }
 
     useEffect(() => {
         setFetchMechanism(null);
@@ -200,7 +207,7 @@ const Home: NextPage = () => {
                         </button>
                         {fetchMechanism === FetchMechanism.GITHUB && (
                             <p
-                                className="rounded-sm bg-[#14191d] text-center text-xs font-semibold uppercase tracking-wide text-gray-400 mt-1"
+                                className="mt-1 rounded-sm bg-[#14191d] text-center text-xs font-semibold uppercase tracking-wide text-gray-400"
                                 title="Scraping page to fetch releases"
                             >
                                 GitHub
@@ -208,7 +215,7 @@ const Home: NextPage = () => {
                         )}
                         {fetchMechanism === FetchMechanism.SCRAPING && (
                             <p
-                                className="rounded-sm bg-yellow-500 text-center text-xs font-semibold uppercase tracking-wide text-yellow-900 mt-1"
+                                className="mt-1 rounded-sm bg-yellow-500 text-center text-xs font-semibold uppercase tracking-wide text-yellow-900"
                                 title="Scraping page to fetch releases"
                             >
                                 Scraping - Experimental
