@@ -18,7 +18,7 @@ const scrapeReleasesFromPage = async (url: string) => {
     const browser = await puppeteer.launch({
         args: process.env.CHROMIUM_PATH ? puppeteer.defaultArgs() : chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: process.env.CHROMIUM_PATH ?? await chromium.executablePath(),
+        executablePath: process.env.CHROMIUM_PATH || await chromium.executablePath(),
         headless: process.env.CHROMIUM_PATH ? "new" : chromium.headless,
         ignoreHTTPSErrors: true,
     });

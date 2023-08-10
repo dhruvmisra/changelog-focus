@@ -8,7 +8,7 @@ export const env = createEnv({
      */
     server: {
         NODE_ENV: z.enum(["development", "test", "production"]),
-        CHROMIUM_PATH: z.string(),
+        CHROMIUM_PATH: z.string().default(""),
         // GITHUB_BASE_URL: z.string().url().default("https://api.github.com"),
     },
 
