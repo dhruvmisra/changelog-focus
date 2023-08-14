@@ -10,12 +10,22 @@ body {
 .releases-container {
     position: sticky;
     top: 0;
+    height: 100vh;
+}
+.releases-container ul {
+    height: 90%;
+    overflow-y: auto;
+}
+.releases-container ul::-webkit-scrollbar {
+    width: 0 !important;
 }
 
 @media (max-width: 640px) {
     .releases-container {
         display: block;
         position: relative;
+        height: 50vh;
+        margin-bottom: 2em;
     }
     .focus-btn-bg {
         z-index: 10;

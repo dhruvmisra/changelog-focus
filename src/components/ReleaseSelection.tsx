@@ -58,7 +58,7 @@ const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
     };
 
     return (
-        <div className="releases-container mb-8 h-fit w-full pt-4">
+        <div className="releases-container h-fit w-full pt-4">
             <h3 className="mb-1 font-medium text-white">Releases</h3>
             <p className="mb-4 text-xs text-gray-500">Select a range to view changelog</p>
             <ul>
