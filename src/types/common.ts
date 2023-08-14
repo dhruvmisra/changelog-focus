@@ -4,6 +4,11 @@ export enum AppEnvironment {
     PRODUCTION = "production",
 }
 
+export enum FetchMechanism {
+    GITHUB = "GITHUB",
+    SCRAPING = "SCRAPING",
+}
+
 export interface GitHubUrls {
     [AppEnvironment.LOCALHOST]: string;
     [AppEnvironment.STAGING]: string;

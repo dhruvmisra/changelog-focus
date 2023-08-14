@@ -3,16 +3,25 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 import { Toaster } from "react-hot-toast";
+import NProgress from "nprogress";
 import { api } from "@/utils/api";
 import * as gtag from "@/utils/gtag";
 
 import "@/styles/globals.css";
+import "@/styles//nprogress.css";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
     const router = useRouter();
+
     useEffect(() => {
-        const handleRouteChange = (url: URL) => {
-            gtag.pageView(url);
+        NProgress.configure({ showSpinner: false });
+    }, []);
+
+    useEffect(() => {
+        const handleRouteChange = (url: URL, { shallow }: { shallow: boolean }) => {
+            if (!shallow) {
+                gtag.pageView(url);
+            }
         };
         router.events.on("routeChangeComplete", handleRouteChange);
         return () => {
@@ -22,7 +31,7 @@ const MyApp: AppType = ({ Component, pageProps }) => {
 
     return (
         <>
-            <Toaster />
+            <Toaster position="bottom-center" />
             <Component {...pageProps} />
         </>
     );

@@ -1,6 +1,35 @@
+import type { NextRouter } from "next/router";
 import type Fuse from "fuse.js";
-import type { ChangelogItemMetadata, ChangelogMetadata, SegregatedChangelog } from "@/types";
+import { FetchMechanism, type ChangelogItemMetadata, type ChangelogMetadata, type SegregatedChangelog } from "@/types";
 import { SLUG_LENGTH } from "@/constants";
+import { GITHUB_BASE_URL } from "@/constants/endpoints";
+
+export const urlEncode = (link: string): string => {
+    return encodeURIComponent(link).replace(/'/g, "%27").replace(/"/g, "%22");
+};
+
+export const urlDecode = (encodedLink: string): string => {
+    return decodeURIComponent(encodedLink.replace(/\+/g, " "));
+};
+
+export const updateQueryParams = (
+    router: NextRouter,
+    queryParams: Record<string, string>
+): void => {
+    const query = {
+        ...router.query,
+        ...queryParams,
+    };
+    void router.push({ query: query }, undefined, { shallow: true });
+};
+
+export const base64Encode = (text: string): string => {
+    return Buffer.from(text).toString("base64");
+};
+
+export const base64Decode = (encodedText: string): string => {
+    return Buffer.from(encodedText, "base64").toString("utf-8");
+};
 
 export const slugify = (text: string): string =>
     text
@@ -21,6 +50,15 @@ export const getSearchableChangelogList = (segregatedChangelog: SegregatedChange
         list.push(...section.children.map((child) => child.raw));
     }
     return list;
+};
+
+export const getFetchMechanism = (repositoryLink: string): FetchMechanism => {
+    const splitUrl = repositoryLink.split(GITHUB_BASE_URL);
+    if (splitUrl.length < 2) {
+        return FetchMechanism.SCRAPING;
+    } else {
+        return FetchMechanism.GITHUB;
+    }
 };
 
 export const updateChangelogMetadataMatches = (
