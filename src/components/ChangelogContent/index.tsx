@@ -15,7 +15,9 @@ import ChangelogContentList from "@/components/ChangelogContent/List";
 import ChangelogContentActionBar from "./ActionBar";
 import { FloatingFocusButton } from "./FocusButton";
 import {
+    getIsFocusedFromQueryParams,
     getSelectedChangelogFromQueryParams,
+    setIsFocusedInQueryParams,
     setReleaseRangeInQueryParams,
     setSelectedChangelogInQueryParams,
 } from "@/utils/query";
@@ -47,17 +49,22 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
             title = `${lastSelectedRelease.name} → ${firstSelectedRelease.name}`;
         }
     }
-    let focusAvailable = false;
-    for (const section of Object.values(segregatedChangelog)) {
-        if (section.hidden) continue;
-        for (const child of section.children) {
-            if (changelogMetadata[child.id]?.selected) {
-                focusAvailable = true;
-                break;
+
+    const isFocusAvailable = (
+        segregatedChangelog: SegregatedChangelog,
+        changelogMetadata: ChangelogMetadata
+    ) => {
+        for (const section of Object.values(segregatedChangelog)) {
+            if (section.hidden) continue;
+            for (const child of section.children) {
+                if (changelogMetadata[child.id]?.selected) {
+                    return true;
+                }
             }
         }
-        if (focusAvailable) break;
-    }
+        return false;
+    };
+    const focusAvailable = isFocusAvailable(segregatedChangelog, changelogMetadata);
     const selectedIds = Object.entries(changelogMetadata)
         .filter(([_, v]) => v.selected)
         .map(([k, _]) => k);
@@ -165,9 +172,15 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
             }
         }
 
+        const isFocusedQuery = getIsFocusedFromQueryParams();
+        const focusAvailable = isFocusAvailable(localSegregatedChangelog, localChangelogMetadata);
+        if (isInitialSelection && focusAvailable && isFocusedQuery) {
+            setIsFocused(true);
+        } else {
+            setIsFocused(false);
+        }
         setAllChangelogMetadata(localChangelogMetadata);
         setAllSegregatedChangelog(localSegregatedChangelog);
-        setIsFocused(false);
         setIsLoading(false);
         setIsInitialSelection(false);
     };
@@ -182,6 +195,12 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         setIsLoading(true);
         void resetChangelogState(tokens);
     }, [releases]);
+
+    useEffect(() => {
+        if (!isInitialSelection) {
+            setIsFocusedInQueryParams(isFocused);
+        }
+    }, [isFocused, isInitialSelection]);
 
     useEffect(() => {
         if (!isInitialSelection) {

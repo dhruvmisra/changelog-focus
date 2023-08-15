@@ -28,6 +28,10 @@ export const setSelectedChangelogInQueryParams = (selectedChangelogIds: string[]
     setQueryParams(QueryParam.SELECTED_CHANGELOG, selectedChangelogIds.join(","));
 };
 
+export const setIsFocusedInQueryParams = (isFocused: boolean): void => {
+    setQueryParams(QueryParam.IS_FOCUSED, JSON.stringify(isFocused));
+};
+
 export const getLinkFromQueryParams = (): string | null => {
     const link = getQueryParams(QueryParam.LINK);
     return link ? urlDecode(link) : null;
@@ -44,4 +48,9 @@ export const getReleaseRangeFromQueryParams = (): ReleaseRangeQuery | null => {
 export const getSelectedChangelogFromQueryParams = (): SelectedChangelogQuery | null => {
     const selectedChangelog = getQueryParams(QueryParam.SELECTED_CHANGELOG);
     return selectedChangelog ? selectedChangelog.split(",") : null;
+};
+
+export const getIsFocusedFromQueryParams = (): boolean | null => {
+    const isFocused = getQueryParams(QueryParam.IS_FOCUSED);
+    return isFocused ? isFocused === "true" : null;
 };
