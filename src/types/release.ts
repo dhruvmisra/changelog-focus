@@ -1,7 +1,7 @@
 import type { Selectable } from "./common";
 
 export type Release = {
-    id: number;
+    id: number | string;
     name: string;
     body: string;
     url: string;

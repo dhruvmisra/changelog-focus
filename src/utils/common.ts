@@ -1,4 +1,3 @@
-import type { NextRouter } from "next/router";
 import type Fuse from "fuse.js";
 import {
     FetchMechanism,
@@ -15,17 +14,6 @@ export const urlEncode = (link: string): string => {
 
 export const urlDecode = (encodedLink: string): string => {
     return decodeURIComponent(encodedLink.replace(/\+/g, " "));
-};
-
-export const updateQueryParams = (
-    router: any,
-    queryParams: Record<string, string>
-): void => {
-    const query = {
-        ...router.query,
-        ...queryParams,
-    };
-    void router.push({ query: query }, undefined, { shallow: true });
 };
 
 export const base64Encode = (text: string): string => {
@@ -49,13 +37,21 @@ export const slugify = (text: string): string =>
     "-" +
     String(Math.floor(Math.random() * 10000000000000000));
 
-export const digest = async (message: string) =>
-    Array.prototype.map
+export const digest = async (message: string): Promise<string> => {
+    let subtle;
+    if (typeof window === "undefined") {
+        const { subtle: subtleNode } = await import("crypto");
+        subtle = subtleNode;
+    } else {
+        subtle = window.crypto.subtle;
+    }
+    return Array.prototype.map
         .call(
-            new Uint8Array(await crypto.subtle.digest("SHA-1", new TextEncoder().encode(message))),
+            new Uint8Array(await subtle.digest("SHA-1", new TextEncoder().encode(message))),
             (x: number) => ("0" + x.toString(16)).slice(-2)
         )
         .join("");
+};
 
 export const getSearchableChangelogList = (segregatedChangelog: SegregatedChangelog): string[] => {
     const list: string[] = [];

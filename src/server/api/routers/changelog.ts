@@ -6,6 +6,7 @@ import puppeteer from "puppeteer-core";
 import TurndownService from "turndown";
 import type { Release } from "@/types";
 import chromium from "@sparticuz/chromium";
+import { digest } from "@/utils/common";
 
 type HeadingsFollowedByLists = {
     [Key: string]: string;
@@ -18,7 +19,7 @@ const scrapeReleasesFromPage = async (url: string) => {
     const browser = await puppeteer.launch({
         args: process.env.CHROMIUM_PATH ? puppeteer.defaultArgs() : chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: process.env.CHROMIUM_PATH || await chromium.executablePath(),
+        executablePath: process.env.CHROMIUM_PATH || (await chromium.executablePath()),
         headless: process.env.CHROMIUM_PATH ? "new" : chromium.headless,
         ignoreHTTPSErrors: true,
     });
@@ -88,7 +89,7 @@ const scrapeReleasesFromPage = async (url: string) => {
         const markdown =
             turndownService.turndown(heading) + "\n" + turndownService.turndown(content);
         const release: Release = {
-            id: Math.floor(Math.random() * 10000000000000000),
+            id: await digest(heading),
             name: heading,
             body: markdown,
             url: url,

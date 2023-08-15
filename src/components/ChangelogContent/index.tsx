@@ -4,16 +4,21 @@ import { useMap } from "react-use";
 import { digest } from "@/utils/common";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { OTHER_SECTION_HEADING } from "@/constants";
-import type {
-    SegregatedChangelog,
-    Release,
-    SegregatedChangelogSection,
-    ChangelogMetadata,
+import {
+    type SegregatedChangelog,
+    type Release,
+    type SegregatedChangelogSection,
+    type ChangelogMetadata,
 } from "@/types";
 import ChangelogContentHeading from "@/components/ChangelogContent/Heading";
 import ChangelogContentList from "@/components/ChangelogContent/List";
 import ChangelogContentActionBar from "./ActionBar";
 import { FloatingFocusButton } from "./FocusButton";
+import {
+    getSelectedChangelogFromQueryParams,
+    setReleaseRangeInQueryParams,
+    setSelectedChangelogInQueryParams,
+} from "@/utils/query";
 
 type ChangelogContentProps = {
     releases: Release[];
@@ -31,6 +36,7 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         useMap<ChangelogMetadata>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isFocused, setIsFocused] = useState<boolean>(false);
+    const [isInitialSelection, setIsInitialSelection] = useState<boolean>(true);
     const firstSelectedRelease = releases.length > 0 ? releases[0] : undefined;
     const lastSelectedRelease = releases.length > 0 ? releases[releases.length - 1] : undefined;
     let title = "";
@@ -52,13 +58,9 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         }
         if (focusAvailable) break;
     }
-    // const selectedIds = Object.entries(changelogMetadata)
-    //     .filter(([_, v]) => v.selected)
-    //     .map(([k, _]) => k);
-    // console.log(selectedIds);
-    // // const urlParams = new URLSearchParams(window.location.search);
-    // // console.log(Object.fromEntries(urlParams.entries()))
-    // // updateQueryParams(router, { selected: selectedIds.join(",") });
+    const selectedIds = Object.entries(changelogMetadata)
+        .filter(([_, v]) => v.selected)
+        .map(([k, _]) => k);
 
     const traverseListItems = useCallback(
         async (
@@ -151,10 +153,23 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
             delete localSegregatedChangelog[OTHER_SECTION_HEADING];
         }
 
+        const selectedChangelogList = getSelectedChangelogFromQueryParams();
+        if (selectedChangelogList) {
+            for (const id of selectedChangelogList) {
+                if (id in localChangelogMetadata) {
+                    localChangelogMetadata[id] = {
+                        ...localChangelogMetadata[id]!,
+                        selected: true,
+                    };
+                }
+            }
+        }
+
         setAllChangelogMetadata(localChangelogMetadata);
         setAllSegregatedChangelog(localSegregatedChangelog);
         setIsFocused(false);
         setIsLoading(false);
+        setIsInitialSelection(false);
     };
 
     useEffect(() => {
@@ -169,15 +184,16 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
     }, [releases]);
 
     useEffect(() => {
-        let tokens: marked.Token[] = [];
-        for (const release of releases) {
-            const releaseTokens = marked.lexer(release.body);
-            tokens = tokens.concat(releaseTokens);
+        if (!isInitialSelection) {
+            setSelectedChangelogInQueryParams(selectedIds);
         }
+    }, [selectedIds, isInitialSelection]);
 
-        setIsLoading(true);
-        void resetChangelogState(tokens);
-    }, [releases]);
+    useEffect(() => {
+        if (!isInitialSelection && firstSelectedRelease && lastSelectedRelease) {
+            setReleaseRangeInQueryParams(firstSelectedRelease.id, lastSelectedRelease.id);
+        }
+    }, [firstSelectedRelease, lastSelectedRelease, isInitialSelection]);
 
     const restoreSections = () => {
         const localSegregatedChangelog: SegregatedChangelog = {};

@@ -11,7 +11,10 @@ type ReleaseSelectionProps = {
 };
 
 const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
-    const handleReleaseSelection = (e: FormEvent<HTMLInputElement>, releaseId: number) => {
+    const handleReleaseSelection = (
+        e: FormEvent<HTMLInputElement>,
+        releaseId: number | string
+    ) => {
         e.preventDefault();
         const newReleases = [...releases];
         const index = newReleases.findIndex((release) => release.id == releaseId);
