@@ -1,6 +1,5 @@
 import Head from "next/head";
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import { useQuery } from "@tanstack/react-query";
 import { GitHub } from "@/utils/github";
 import type { AxiosError } from "axios";
@@ -15,16 +14,21 @@ import { FetchMechanism } from "@/types";
 import ReleaseSelection from "@/components/ReleaseSelection";
 import NProgress from "nprogress";
 import { RELEASES_FETCH_LIMIT } from "@/constants";
-import { getFetchMechanism, updateQueryParams, urlDecode, urlEncode } from "@/utils/common";
+import { getFetchMechanism } from "@/utils/common";
 import { api } from "@/utils/api";
+import {
+    getLinkFromQueryParams,
+    getReleaseRangeFromQueryParams,
+    setLinkInQueryParams,
+} from "@/utils/query";
 
 const Home: NextPage = () => {
-    const router = useRouter();
     const [mainRef] = useAutoAnimate();
     const [containerRef] = useAutoAnimate();
     const [formRef] = useAutoAnimate();
     const [repositoryLink, setRepositoryLink] = useState("");
     const [fetchMechanism, setFetchMechanism] = useState<FetchMechanism | null>(null);
+    const [initialFetch, setInitialFetch] = useState<boolean>(true);
 
     const {
         data: scrapedReleases,
@@ -93,11 +97,24 @@ const Home: NextPage = () => {
     }
 
     useEffect(() => {
+        const linkQuery = getLinkFromQueryParams();
+        linkQuery && setRepositoryLink(linkQuery);
+    }, []);
+
+    useEffect(() => {
         setFetchMechanism(null);
+        const linkQuery = getLinkFromQueryParams();
+        if (initialFetch && linkQuery && repositoryLink) {
+            const mechanism = getFetchMechanism(repositoryLink);
+            setFetchMechanism(mechanism);
+            getReleases(mechanism);
+            setInitialFetch(false);
+        }
     }, [repositoryLink]);
 
     useEffect(() => {
         const localReleases: SelectableRelease[] = [];
+
         if (releases) {
             for (const release of releases) {
                 localReleases.push({
@@ -105,19 +122,27 @@ const Home: NextPage = () => {
                     ...release,
                 });
             }
-            updateQueryParams(router, { link: urlEncode(repositoryLink) });
+            setLinkInQueryParams(repositoryLink);
+
+            const releaseRangeQuery = getReleaseRangeFromQueryParams();
+            if (releaseRangeQuery) {
+                const { first, last } = releaseRangeQuery;
+                let foundFirst = false;
+                for (const release of localReleases) {
+                    if (String(release.id) === first) {
+                        foundFirst = true;
+                    }
+                    if (foundFirst) {
+                        release.selected = true;
+                    }
+                    if (String(release.id) === last) {
+                        break;
+                    }
+                }
+            }
         }
         setFilteredReleases(localReleases);
     }, [scrapedReleases, githubReleases]);
-
-    useEffect(() => {
-        if (!router.isReady) return;
-
-        const { link } = router.query;
-        if (link) {
-            setRepositoryLink(urlDecode(link as string));
-        }
-    }, [router.isReady]);
 
     const getReleases = (mechanism: FetchMechanism) => {
         switch (mechanism) {
@@ -136,10 +161,11 @@ const Home: NextPage = () => {
 
     const handleReleasesSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        updateQueryParams(router, { link: urlEncode(repositoryLink) });
         const mechanism = getFetchMechanism(repositoryLink);
         setFetchMechanism(mechanism);
         getReleases(mechanism);
+        setInitialFetch(false);
+        setLinkInQueryParams(repositoryLink);
     };
 
     return (

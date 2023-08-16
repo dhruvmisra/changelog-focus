@@ -1,19 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
 import { marked } from "marked";
 import { useMap } from "react-use";
-import { slugify } from "@/utils/common";
+import { digest } from "@/utils/common";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { OTHER_SECTION_HEADING } from "@/constants";
-import type {
-    SegregatedChangelog,
-    Release,
-    SegregatedChangelogSection,
-    ChangelogMetadata,
+import {
+    type SegregatedChangelog,
+    type Release,
+    type SegregatedChangelogSection,
+    type ChangelogMetadata,
 } from "@/types";
 import ChangelogContentHeading from "@/components/ChangelogContent/Heading";
 import ChangelogContentList from "@/components/ChangelogContent/List";
 import ChangelogContentActionBar from "./ActionBar";
 import { FloatingFocusButton } from "./FocusButton";
+import {
+    getIsFocusedFromQueryParams,
+    getSelectedChangelogFromQueryParams,
+    setIsFocusedInQueryParams,
+    setReleaseRangeInQueryParams,
+    setSelectedChangelogInQueryParams,
+} from "@/utils/query";
 
 type ChangelogContentProps = {
     releases: Release[];
@@ -29,7 +36,9 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
     ] = useMap<SegregatedChangelog>();
     const [changelogMetadata, { set: setChangelogMetadata, setAll: setAllChangelogMetadata }] =
         useMap<ChangelogMetadata>();
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isFocused, setIsFocused] = useState<boolean>(false);
+    const [isInitialSelection, setIsInitialSelection] = useState<boolean>(true);
     const firstSelectedRelease = releases.length > 0 ? releases[0] : undefined;
     const lastSelectedRelease = releases.length > 0 ? releases[releases.length - 1] : undefined;
     let title = "";
@@ -40,27 +49,35 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
             title = `${lastSelectedRelease.name} → ${firstSelectedRelease.name}`;
         }
     }
-    let focusAvailable = false;
-    for (const section of Object.values(segregatedChangelog)) {
-        if (section.hidden) continue;
-        for (const child of section.children) {
-            if (changelogMetadata[child.id]?.selected) {
-                focusAvailable = true;
-                break;
+
+    const isFocusAvailable = (
+        segregatedChangelog: SegregatedChangelog,
+        changelogMetadata: ChangelogMetadata
+    ) => {
+        for (const section of Object.values(segregatedChangelog)) {
+            if (section.hidden) continue;
+            for (const child of section.children) {
+                if (changelogMetadata[child.id]?.selected) {
+                    return true;
+                }
             }
         }
-        if (focusAvailable) break;
-    }
+        return false;
+    };
+    const focusAvailable = isFocusAvailable(segregatedChangelog, changelogMetadata);
+    const selectedIds = Object.entries(changelogMetadata)
+        .filter(([_, v]) => v.selected)
+        .map(([k, _]) => k);
 
     const traverseListItems = useCallback(
-        (
+        async (
             listItems: marked.Tokens.ListItem[],
             localSegregatedChangelog: SegregatedChangelog,
             localChangelogMetadata: ChangelogMetadata,
             currentHeading: string
-        ): marked.Tokens.ListItem[] => {
+        ): Promise<marked.Tokens.ListItem[]> => {
             for (const [i, item] of listItems.entries()) {
-                item.tokens = traverseTokensTree(
+                item.tokens = await traverseTokensTree(
                     item.tokens,
                     localSegregatedChangelog,
                     localChangelogMetadata,
@@ -72,18 +89,20 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                     displayName: currentHeading,
                     hidden: false,
                 };
-                const id = slugify(item.text);
-                newSection.children.push({
-                    id: id,
-                    originalSortScore: i,
-                    ...item,
-                });
-                localChangelogMetadata[id] = {
-                    selected: false,
-                    matched: true,
-                    matchScore: i,
-                };
-                localSegregatedChangelog[currentHeading] = newSection;
+                const id = await digest(item.text);
+                if (!(id in localChangelogMetadata)) {
+                    newSection.children.push({
+                        id: id,
+                        originalSortScore: i,
+                        ...item,
+                    });
+                    localChangelogMetadata[id] = {
+                        selected: false,
+                        matched: true,
+                        matchScore: i,
+                    };
+                    localSegregatedChangelog[currentHeading] = newSection;
+                }
             }
             return listItems;
         },
@@ -91,15 +110,15 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
     );
 
     const traverseTokensTree = useCallback(
-        (
+        async (
             tokens: TraversableToken[],
             localSegregatedChangelog: SegregatedChangelog,
             localChangelogMetadata: ChangelogMetadata,
             currentHeading: string
-        ): marked.Token[] => {
+        ): Promise<marked.Token[]> => {
             for (const token of tokens) {
                 if (token.tokens) {
-                    token.tokens = traverseTokensTree(
+                    token.tokens = await traverseTokensTree(
                         token.tokens as TraversableToken[],
                         localSegregatedChangelog,
                         localChangelogMetadata,
@@ -110,7 +129,7 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                 if (token.type == "heading") {
                     currentHeading = token.text;
                 } else if (token.type == "list") {
-                    token.items = traverseListItems(
+                    token.items = await traverseListItems(
                         token.items,
                         localSegregatedChangelog,
                         localChangelogMetadata,
@@ -123,13 +142,7 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         [traverseListItems]
     );
 
-    useEffect(() => {
-        let tokens: marked.Token[] = [];
-        for (const release of releases) {
-            const releaseTokens = marked.lexer(release.body);
-            tokens = tokens.concat(releaseTokens);
-        }
-
+    const resetChangelogState = async (tokens: marked.Token[]) => {
         const localSegregatedChangelog: SegregatedChangelog = {};
         const localChangelogMetadata: ChangelogMetadata = {};
         localSegregatedChangelog[OTHER_SECTION_HEADING] = {
@@ -137,7 +150,7 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
             displayName: "Other",
             hidden: false,
         };
-        traverseTokensTree(
+        await traverseTokensTree(
             tokens,
             localSegregatedChangelog,
             localChangelogMetadata,
@@ -147,9 +160,59 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
             delete localSegregatedChangelog[OTHER_SECTION_HEADING];
         }
 
+        const selectedChangelogList = getSelectedChangelogFromQueryParams();
+        if (selectedChangelogList) {
+            for (const id of selectedChangelogList) {
+                if (id in localChangelogMetadata) {
+                    localChangelogMetadata[id] = {
+                        ...localChangelogMetadata[id]!,
+                        selected: true,
+                    };
+                }
+            }
+        }
+
+        const isFocusedQuery = getIsFocusedFromQueryParams();
+        const focusAvailable = isFocusAvailable(localSegregatedChangelog, localChangelogMetadata);
+        if (isInitialSelection && focusAvailable && isFocusedQuery) {
+            setIsFocused(true);
+        } else {
+            setIsFocused(false);
+        }
         setAllChangelogMetadata(localChangelogMetadata);
         setAllSegregatedChangelog(localSegregatedChangelog);
-    }, [releases, setAllSegregatedChangelog, setAllChangelogMetadata, traverseTokensTree]);
+        setIsLoading(false);
+        setIsInitialSelection(false);
+    };
+
+    useEffect(() => {
+        let tokens: marked.Token[] = [];
+        for (const release of releases) {
+            const releaseTokens = marked.lexer(release.body);
+            tokens = tokens.concat(releaseTokens);
+        }
+
+        setIsLoading(true);
+        void resetChangelogState(tokens);
+    }, [releases]);
+
+    useEffect(() => {
+        if (!isInitialSelection) {
+            setIsFocusedInQueryParams(isFocused);
+        }
+    }, [isFocused, isInitialSelection]);
+
+    useEffect(() => {
+        if (!isInitialSelection) {
+            setSelectedChangelogInQueryParams(selectedIds);
+        }
+    }, [selectedIds, isInitialSelection]);
+
+    useEffect(() => {
+        if (!isInitialSelection && firstSelectedRelease && lastSelectedRelease) {
+            setReleaseRangeInQueryParams(firstSelectedRelease.id, lastSelectedRelease.id);
+        }
+    }, [firstSelectedRelease, lastSelectedRelease, isInitialSelection]);
 
     const restoreSections = () => {
         const localSegregatedChangelog: SegregatedChangelog = {};
@@ -176,7 +239,11 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
     };
 
     return (
-        <div className={`release-container container pb-10 ${isFocused ? "focus" : ""}`}>
+        <div
+            className={`release-container container relative pb-10 ${isFocused ? "focus" : ""} ${
+                isLoading ? "pointer-events-none select-none blur-sm" : ""
+            }`}
+        >
             <ChangelogContentActionBar
                 title={title}
                 segregatedChangelog={segregatedChangelog}
