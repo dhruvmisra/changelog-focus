@@ -103,7 +103,8 @@ const Home: NextPage = () => {
 
     useEffect(() => {
         setFetchMechanism(null);
-        if (repositoryLink && initialFetch) {
+        const linkQuery = getLinkFromQueryParams();
+        if (initialFetch && linkQuery && repositoryLink) {
             const mechanism = getFetchMechanism(repositoryLink);
             setFetchMechanism(mechanism);
             getReleases(mechanism);
