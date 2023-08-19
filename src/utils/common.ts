@@ -40,8 +40,8 @@ export const slugify = (text: string): string =>
 export const digest = async (message: string): Promise<string> => {
     let subtle;
     if (typeof window === "undefined") {
-        const { subtle: subtleNode } = await import("crypto");
-        subtle = subtleNode;
+        const nodeCrypto = await import("crypto");
+        subtle = nodeCrypto.webcrypto.subtle;
     } else {
         subtle = window.crypto.subtle;
     }
