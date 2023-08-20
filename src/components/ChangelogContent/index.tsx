@@ -76,7 +76,7 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
             localChangelogMetadata: ChangelogMetadata,
             currentHeading: string
         ): Promise<marked.Tokens.ListItem[]> => {
-            for (const [i, item] of listItems.entries()) {
+            for (const item of listItems) {
                 item.tokens = await traverseTokensTree(
                     item.tokens,
                     localSegregatedChangelog,
@@ -89,17 +89,18 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
                     displayName: currentHeading,
                     hidden: false,
                 };
+                const score = newSection.children.length;
                 const id = await digest(item.text);
                 if (!(id in localChangelogMetadata)) {
                     newSection.children.push({
                         id: id,
-                        originalSortScore: i,
+                        originalSortScore: score,
                         ...item,
                     });
                     localChangelogMetadata[id] = {
                         selected: false,
                         matched: true,
-                        matchScore: i,
+                        matchScore: score,
                     };
                     localSegregatedChangelog[currentHeading] = newSection;
                 }
