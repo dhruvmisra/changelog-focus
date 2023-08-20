@@ -13,7 +13,7 @@ import {
 import ChangelogContentHeading from "@/components/ChangelogContent/Heading";
 import ChangelogContentList from "@/components/ChangelogContent/List";
 import ChangelogContentActionBar from "./ActionBar";
-import { FloatingFocusButton } from "./FocusButton";
+import { FloatingFocusButton } from "./ActionBar/FocusButton";
 import {
     getIsFocusedFromQueryParams,
     getSelectedChangelogFromQueryParams,
