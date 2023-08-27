@@ -9,7 +9,7 @@ export const Header = () => {
             <Link href="/">
                 <Image priority src={Logo} height={32} width={32} alt="Changelog Focus logo" />
             </Link>
-            {!process.env.NEXT_PUBLIC_PRE_RELEASE && (
+            {!process.env.NEXT_PUBLIC_PRE_RELEASE_TAG && (
                 <Link
                     href="https://github.com/dhruvmisra/changelog-focus"
                     target="_blank"

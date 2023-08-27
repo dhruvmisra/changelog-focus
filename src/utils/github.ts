@@ -1,4 +1,4 @@
-import { GithubAxiosInstance } from "@/config/axiosConfig";
+import { GithubAxiosInstance } from "@/config/axios";
 import { GITHUB_RELEASES } from "@/constants/endpoints";
 import type { Release } from "@/types";
 

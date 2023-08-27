@@ -32,9 +32,9 @@ export const setIsFocusedInQueryParams = (isFocused: boolean): void => {
     setQueryParams(QueryParam.IS_FOCUSED, JSON.stringify(isFocused));
 };
 
-export const getLinkFromQueryParams = (): string | null => {
+export const getLinkFromQueryParams = (): string => {
     const link = getQueryParams(QueryParam.LINK);
-    return link ? urlDecode(link) : null;
+    return link ? urlDecode(link) : "";
 };
 
 export const getReleaseRangeFromQueryParams = (): ReleaseRangeQuery | null => {
