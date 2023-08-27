@@ -10,9 +10,9 @@ import {
     type SegregatedChangelogSection,
     type ChangelogMetadata,
 } from "@/types";
-import ChangelogContentHeading from "@/components/ChangelogContent/Heading";
-import ChangelogContentList from "@/components/ChangelogContent/List";
-import ChangelogContentActionBar from "./ActionBar";
+import { ChangelogContentHeading } from "@/components/ChangelogContent/Heading";
+import { ChangelogContentList } from "@/components/ChangelogContent/List";
+import { ChangelogContentActionBar } from "./ActionBar";
 import { FloatingFocusButton } from "./ActionBar/FocusButton";
 import {
     getIsFocusedFromQueryParams,
@@ -28,7 +28,7 @@ type ChangelogContentProps = {
 
 type TraversableToken = marked.Token & { tokens?: marked.Token[] };
 
-const ChangelogContent = ({ releases }: ChangelogContentProps) => {
+export const ChangelogContent = ({ releases }: ChangelogContentProps) => {
     const [autoAnimateRef] = useAutoAnimate();
     const [
         segregatedChangelog,
@@ -291,5 +291,3 @@ const ChangelogContent = ({ releases }: ChangelogContentProps) => {
         </div>
     );
 };
-
-export default ChangelogContent;

@@ -15,7 +15,7 @@ type ChangelogContentListProps = {
     setChangelogMetadata: <K extends string | number>(key: K, value: ChangelogMetadata[K]) => void;
 };
 
-const ChangelogContentList = ({
+export const ChangelogContentList = ({
     section,
     changelogMetadata,
     isFocused,
@@ -68,5 +68,3 @@ const ChangelogContentList = ({
         </ul>
     );
 };
-
-export default ChangelogContentList;

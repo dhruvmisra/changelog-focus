@@ -14,7 +14,7 @@ type ChangelogContentActionBarProps = {
     setAllChangelogMetadata: (newMap: ChangelogMetadata) => void;
 };
 
-const ChangelogContentActionBar = ({
+export const ChangelogContentActionBar = ({
     title,
     segregatedChangelog,
     changelogMetadata,
@@ -72,5 +72,3 @@ const ChangelogContentActionBar = ({
         </div>
     );
 };
-
-export default ChangelogContentActionBar;

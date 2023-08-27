@@ -12,7 +12,7 @@ type ChangelogContentHeadingProps = {
     ) => void;
 };
 
-const ChangelogContentHeading = ({
+export const ChangelogContentHeading = ({
     section,
     headingKey,
     isFocused,
@@ -81,5 +81,3 @@ const ChangelogContentHeading = ({
         </div>
     );
 };
-
-export default ChangelogContentHeading;

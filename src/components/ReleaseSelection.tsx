@@ -10,7 +10,7 @@ type ReleaseSelectionProps = {
     setReleases: (releases: SelectableRelease[]) => void;
 };
 
-const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
+export const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
     const handleReleaseSelection = (
         e: FormEvent<HTMLInputElement>,
         releaseId: number | string
@@ -99,5 +99,3 @@ const ReleaseSelection = ({ releases, setReleases }: ReleaseSelectionProps) => {
         </div>
     );
 };
-
-export default ReleaseSelection;
