@@ -170,68 +170,52 @@ const Home: NextPage = () => {
     };
 
     return (
-        <>
-            <Head>
-                <title>Changelog Focus</title>
-                <meta name="description" content="Focus on the changelog relevant to you" />
-                <link rel="icon" href="/favicon.ico" />
-                <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-                <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-                <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-                <link rel="manifest" href="/site.webmanifest" />
-                <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
-                <meta name="msapplication-TileColor" content="#da532c" />
-                <meta name="theme-color" content="#ffffff" />
-            </Head>
-            <main className="pt-8" ref={mainRef}>
-                <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-white drop-shadow-md sm:text-5xl">
-                    Changelog <span className="text-violet-600 drop-shadow-md">Focus</span>
-                    {process.env.NEXT_PUBLIC_PRE_RELEASE_TAG && (
-                        <span className="prerelease-tag text-xs font-bold tracking-normal sm:text-sm">
-                            {" "}
-                            [{process.env.NEXT_PUBLIC_PRE_RELEASE_TAG}]
-                        </span>
-                    )}
-                </h1>
-                <p className="mb-6 text-lg text-gray-400">
-                    Focus on the changelog relevant to you.
-                </p>
+        <main className="pt-8" ref={mainRef}>
+            <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-white drop-shadow-md sm:text-5xl">
+                Changelog <span className="text-violet-600 drop-shadow-md">Focus</span>
+                {process.env.NEXT_PUBLIC_PRE_RELEASE_TAG && (
+                    <span className="prerelease-tag text-xs font-bold tracking-normal sm:text-sm">
+                        {" "}
+                        [{process.env.NEXT_PUBLIC_PRE_RELEASE_TAG}]
+                    </span>
+                )}
+            </h1>
+            <p className="mb-6 text-lg text-gray-400">Focus on the changelog relevant to you.</p>
 
-                <LinkForm
-                    repositoryLink={repositoryLink}
-                    setRepositoryLink={setRepositoryLink}
-                    isLoading={isLoading}
-                    fetchMechanism={fetchMechanism}
-                    onSubmit={handleLinkSubmit}
-                />
+            <LinkForm
+                repositoryLink={repositoryLink}
+                setRepositoryLink={setRepositoryLink}
+                isLoading={isLoading}
+                fetchMechanism={fetchMechanism}
+                onSubmit={handleLinkSubmit}
+            />
 
-                <div className="container block w-full gap-4 sm:flex" ref={containerRef}>
-                    {releases &&
-                        (releases.length > 0 ? (
-                            <div className="grow">
-                                <ReleaseSelection
-                                    releases={filteredReleases}
-                                    setReleases={setFilteredReleases}
-                                />
-                            </div>
-                        ) : (
-                            <div className="grow">
-                                <p
-                                    className="mt-6 rounded-lg border border-red-600 bg-red-600/40 p-2 text-center text-sm text-red-100"
-                                    title="Scraping page to fetch releases"
-                                >
-                                    Could not find releases. Please verify the link.
-                                </p>
-                            </div>
-                        ))}
-                    {selectedReleases.length > 0 && (
-                        <div className="grow basis-3/5">
-                            <ChangelogContent releases={selectedReleases} />
+            <div className="container block w-full gap-4 sm:flex" ref={containerRef}>
+                {releases &&
+                    (releases.length > 0 ? (
+                        <div className="grow">
+                            <ReleaseSelection
+                                releases={filteredReleases}
+                                setReleases={setFilteredReleases}
+                            />
                         </div>
-                    )}
-                </div>
-            </main>
-        </>
+                    ) : (
+                        <div className="grow">
+                            <p
+                                className="mt-6 rounded-lg border border-red-600 bg-red-600/40 p-2 text-center text-sm text-red-100"
+                                title="Scraping page to fetch releases"
+                            >
+                                Could not find releases. Please verify the link.
+                            </p>
+                        </div>
+                    ))}
+                {selectedReleases.length > 0 && (
+                    <div className="grow basis-3/5">
+                        <ChangelogContent releases={selectedReleases} />
+                    </div>
+                )}
+            </div>
+        </main>
     );
 };
 
