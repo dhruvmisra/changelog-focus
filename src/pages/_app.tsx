@@ -3,13 +3,15 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 import { Toaster } from "react-hot-toast";
+import { DefaultSeo } from "next-seo";
 import NProgress from "nprogress";
+import { Header } from "@/components/Header";
 import { api } from "@/utils/api";
 import * as gtag from "@/utils/gtag";
+import { DEFAULT_SEO } from "@/utils/seo";
 
 import "@/styles/globals.css";
 import "@/styles//nprogress.css";
-import { Header } from "@/components/Header";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
     const router = useRouter();
@@ -34,7 +36,8 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     }, [router.events]);
 
     return (
-        <div className="container mx-auto min-h-screen px-2 sm:px-4">
+        <div className="container mx-auto min-h-screen px-4">
+            <DefaultSeo {...DEFAULT_SEO} />
             <Header />
             <Toaster position="bottom-center" />
             <Component {...pageProps} />
