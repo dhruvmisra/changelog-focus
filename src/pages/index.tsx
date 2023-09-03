@@ -1,4 +1,3 @@
-import Head from "next/head";
 import type { NextPage } from "next";
 import { useQuery } from "@tanstack/react-query";
 import { GitHub } from "@/utils/github";
@@ -13,6 +12,8 @@ import { FetchMechanism } from "@/types";
 import { ChangelogContent } from "@/components/ChangelogContent";
 import { ReleaseSelection } from "@/components/ReleaseSelection";
 import { LinkForm } from "@/components/LinkForm";
+import { Features } from "@/components/Features";
+import { Footer } from "@/components/Footer";
 import NProgress from "nprogress";
 import { RELEASES_FETCH_LIMIT } from "@/constants";
 import { getFetchMechanism } from "@/utils/common";
@@ -29,6 +30,7 @@ const Home: NextPage = () => {
     const [repositoryLink, setRepositoryLink] = useState("");
     const [fetchMechanism, setFetchMechanism] = useState<FetchMechanism | null>(null);
     const [initialFetch, setInitialFetch] = useState<boolean>(true);
+    const [showFeatures, setShowFeatures] = useState<boolean>(true);
 
     const {
         data: scrapedReleases,
@@ -99,6 +101,7 @@ const Home: NextPage = () => {
     useEffect(() => {
         const linkQuery = getLinkFromQueryParams();
         setRepositoryLink(linkQuery);
+        setShowFeatures(linkQuery === "");
     }, [typeof window !== "undefined" && window.location.search]);
 
     useEffect(() => {
@@ -171,24 +174,28 @@ const Home: NextPage = () => {
 
     return (
         <main className="pt-8" ref={mainRef}>
-            <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-white drop-shadow-md sm:text-5xl">
-                Changelog <span className="text-violet-600 drop-shadow-md">Focus</span>
-                {process.env.NEXT_PUBLIC_PRE_RELEASE_TAG && (
-                    <span className="prerelease-tag text-xs font-bold tracking-normal sm:text-sm">
-                        {" "}
-                        [{process.env.NEXT_PUBLIC_PRE_RELEASE_TAG}]
-                    </span>
-                )}
-            </h1>
-            <p className="mb-6 text-lg text-gray-400">Focus on the changelog relevant to you.</p>
+            <article className="hero">
+                <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-white drop-shadow-md sm:text-5xl">
+                    Changelog <span className="text-violet-600 drop-shadow-md">Focus</span>
+                    {process.env.NEXT_PUBLIC_PRE_RELEASE_TAG && (
+                        <span className="prerelease-tag text-xs font-bold tracking-normal sm:text-sm">
+                            {" "}
+                            [{process.env.NEXT_PUBLIC_PRE_RELEASE_TAG}]
+                        </span>
+                    )}
+                </h1>
+                <p className="mb-6 text-lg text-gray-400">
+                    Focus on the changelog relevant to you.
+                </p>
 
-            <LinkForm
-                repositoryLink={repositoryLink}
-                setRepositoryLink={setRepositoryLink}
-                isLoading={isLoading}
-                fetchMechanism={fetchMechanism}
-                onSubmit={handleLinkSubmit}
-            />
+                <LinkForm
+                    repositoryLink={repositoryLink}
+                    setRepositoryLink={setRepositoryLink}
+                    isLoading={isLoading}
+                    fetchMechanism={fetchMechanism}
+                    onSubmit={handleLinkSubmit}
+                />
+            </article>
 
             <div className="container block w-full gap-4 sm:flex" ref={containerRef}>
                 {releases &&
@@ -215,6 +222,9 @@ const Home: NextPage = () => {
                     </div>
                 )}
             </div>
+
+            {showFeatures && <Features />}
+            <Footer />
         </main>
     );
 };

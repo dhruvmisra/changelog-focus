@@ -128,3 +128,8 @@ body {
     opacity: 0.5;
     transform: translateX(0);
 }
+
+.illustration-bg {
+    background-size: 40px 40px;
+    background-image: radial-gradient(circle at 10% 10%, theme("colors.gray.600") 1px, transparent 1px);
+}
