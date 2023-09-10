@@ -5,7 +5,6 @@ export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_MEASUREMENT_ID as strin
  * https://developers.google.com/analytics/devguides/collection/gtagjs/pages
  * */
 export const pageView = (url: URL) => {
-    console.log("pageView", url);
     window.gtag("config", GA_MEASUREMENT_ID, {
         page_path: url,
     });

@@ -8,17 +8,18 @@ export default function Document() {
             <Head>
                 {/* Conditionally render script only if in production */}
                 {process.env.NODE_ENV === "production" && (
-                    <>
-                        <Script
-                            id={GA_MEASUREMENT_ID}
-                            strategy="afterInteractive"
-                            src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-                        />
-                        <Script
-                            id={GA_MEASUREMENT_ID}
-                            strategy="afterInteractive"
-                            dangerouslySetInnerHTML={{
-                                __html: `
+                    <Script
+                        id={GA_MEASUREMENT_ID}
+                        strategy="afterInteractive"
+                        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+                    />
+                )}
+                {process.env.NODE_ENV === "production" && (
+                    <Script
+                        id={GA_MEASUREMENT_ID}
+                        strategy="afterInteractive"
+                        dangerouslySetInnerHTML={{
+                            __html: `
                                     window.dataLayer = window.dataLayer || [];
                                     function gtag(){dataLayer.push(arguments);}
                                     gtag('js', new Date());
@@ -26,9 +27,8 @@ export default function Document() {
                                     page_path: window.location.pathname,
                                     });
                                 `,
-                            }}
-                        />
-                    </>
+                        }}
+                    />
                 )}
             </Head>
             <body>
