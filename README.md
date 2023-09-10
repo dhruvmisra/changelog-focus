@@ -20,7 +20,12 @@
 <img src="https://img.shields.io/badge/made%20by-dhruvmisra-blue.svg">
 </div>
 
+<br/>
+
 Changelog Focus let's you aggregate changelog across releases and let's you pick and choose the changelog items relevant to your codebase.
+
+https://github.com/dhruvmisra/changelog-focus/assets/40134655/8512f266-be6c-48c2-ae21-1483c92034c3
+
 
 ## Motivation
 
@@ -69,7 +74,7 @@ A lot of websites use a client-side rendered application, which doesn't have any
 
 ## Development
 
-Make sure you have node v18 installed along with `yarn`.
+This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`. Make sure you have node v18 installed along with `yarn`.
 
 ### 1. Install dependencies
 
@@ -101,7 +106,7 @@ and copy the output path (`/tmp/localChromium/chromium/mac-1194571/chrome-mac/Ch
 yarn dev
 ```
 
-The application will be available on http://localhost:3000.
+The application will be available on `http://localhost:3000`.
 
 ## Contributing
 
@@ -115,10 +120,8 @@ Contributions are welcome. Please refer to [contributing guidelines](./CONTRIBUT
 
 ## Support Me
 
+Help me keep this project running.
+
 <a href="https://www.buymeacoffee.com/dhruvmisra" target="_blank">
   <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="120" >
 </a>
-
-<br>
-
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
