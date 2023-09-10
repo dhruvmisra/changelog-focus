@@ -13,7 +13,7 @@ Code dontributions are welcome. If you're new to the project, you can open a pul
 To allow scraping from a new host:
 
 - Add the new host to `SCRAPING_ALLOWED_HOSTS` list in `./src/constants/index.ts`
-- Add the new host to the list in `./docs/allowed-hosts-for-scraping.md`
+- Add the new host to the list in `docs/allowed-hosts-for-scraping.md`
 
 Please refrain from adding personal websites to the list.
 

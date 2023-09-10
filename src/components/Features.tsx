@@ -21,7 +21,7 @@ export const Features = () => {
                                 Some organisations don&apos;t maintain changelog in GitHub
                                 releases. For those cases, you can add a URL to the changelog page.
                                 (experimental - see{" "}
-                                <a href="https://github.com/dhruvmisra/changelog-focus/docs/allowed-hosts-for-scraping.md">
+                                <a href="https://github.com/dhruvmisra/changelog-focus/blob/main/docs/allowed-hosts-for-scraping.md">
                                     allowed hosts
                                 </a>
                                 )
