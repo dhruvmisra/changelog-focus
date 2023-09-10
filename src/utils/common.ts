@@ -5,7 +5,7 @@ import {
     type ChangelogMetadata,
     type SegregatedChangelog,
 } from "@/types";
-import { SCRAPING_SUPPORTED_HOSTS } from "@/constants";
+import { SCRAPING_ALLOWED_HOSTS } from "@/constants";
 import { GITHUB_BASE_URL } from "@/constants/endpoints";
 
 export const urlEncode = (link: string): string => {
@@ -14,14 +14,6 @@ export const urlEncode = (link: string): string => {
 
 export const urlDecode = (encodedLink: string): string => {
     return decodeURIComponent(encodedLink.replace(/\+/g, " "));
-};
-
-export const base64Encode = (text: string): string => {
-    return Buffer.from(text).toString("base64");
-};
-
-export const base64Decode = (encodedText: string): string => {
-    return Buffer.from(encodedText, "base64").toString("utf-8");
 };
 
 export const digest = async (message: string): Promise<string> => {
@@ -60,7 +52,7 @@ const isHostSupported = (url: URL, supportedUrls: string[]) => {
 export const getFetchMechanism = (url: URL): FetchMechanism => {
     if (url.host === GITHUB_BASE_URL) {
         return FetchMechanism.GITHUB;
-    } else if (isHostSupported(url, SCRAPING_SUPPORTED_HOSTS)) {
+    } else if (isHostSupported(url, SCRAPING_ALLOWED_HOSTS)) {
         return FetchMechanism.SCRAPING;
     }
     return FetchMechanism.UNSUPPORTED;
