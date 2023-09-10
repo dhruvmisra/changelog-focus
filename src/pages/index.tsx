@@ -13,7 +13,6 @@ import { ChangelogContent } from "@/components/ChangelogContent";
 import { ReleaseSelection } from "@/components/ReleaseSelection";
 import { LinkForm } from "@/components/LinkForm";
 import { Features } from "@/components/Features";
-import { Footer } from "@/components/Footer";
 import NProgress from "nprogress";
 import { RELEASES_FETCH_LIMIT } from "@/constants";
 import { getFetchMechanism } from "@/utils/common";
@@ -52,15 +51,20 @@ const Home: NextPage = () => {
     );
 
     const getGitHubReleases = async () => {
-        const splitUrl = repositoryLink.split(GITHUB_BASE_URL);
-        if (splitUrl.length < 2) {
+        let url: URL;
+        try {
+            url = new URL(repositoryLink);
+        } catch (e) {
+            throw new Error("Invalid URL");
+        }
+
+        if (url.host !== GITHUB_BASE_URL) {
             throw new Error("Not a GitHub URL");
         }
 
-        const path = splitUrl[1]!;
-        const splitPath = path.split("/");
+        const splitPath = url.pathname.split("/");
         if (splitPath.length < 3) {
-            throw new Error("Not a valid GitHub URL");
+            throw new Error("Not a valid GitHub repository URL");
         }
         const owner = splitPath[1]!;
         const repo = splitPath[2]!;
@@ -74,7 +78,7 @@ const Home: NextPage = () => {
         refetch: refetchGithubReleases,
         isInitialLoading: isInitialLoadingGithubReleases,
         isRefetching: isRefetchingGithubReleases,
-    } = useQuery<Release[]>([`releases_${repositoryLink}`], getGitHubReleases, {
+    } = useQuery<Release[]>(["releases", repositoryLink], getGitHubReleases, {
         enabled: false,
         retry: false,
         onError: (error: unknown) => {
@@ -92,10 +96,12 @@ const Home: NextPage = () => {
     const [filteredReleases, setFilteredReleases] = useState<SelectableRelease[]>([]);
     const selectedReleases = filteredReleases.filter((release) => release.selected);
 
-    if (isLoading) {
-        NProgress.start();
-    } else {
-        NProgress.done();
+    if (typeof window !== "undefined") {
+        if (isLoading) {
+            NProgress.start();
+        } else {
+            NProgress.done();
+        }
     }
 
     useEffect(() => {
@@ -108,7 +114,13 @@ const Home: NextPage = () => {
         setFetchMechanism(null);
 
         if (repositoryLink) {
-            const mechanism = getFetchMechanism(repositoryLink);
+            let url: URL;
+            try {
+                url = new URL(repositoryLink);
+            } catch (e) {
+                return;
+            }
+            const mechanism = getFetchMechanism(url);
             const linkQuery = getLinkFromQueryParams();
 
             if (initialFetch && linkQuery) {
@@ -165,7 +177,14 @@ const Home: NextPage = () => {
     };
 
     const handleLinkSubmit = () => {
-        const mechanism = getFetchMechanism(repositoryLink);
+        let url: URL;
+        try {
+            url = new URL(repositoryLink);
+        } catch (e) {
+            toast.error("Invalid URL");
+            return;
+        }
+        const mechanism = getFetchMechanism(url);
         setFetchMechanism(mechanism);
         getReleases(mechanism);
         setInitialFetch(false);
@@ -207,15 +226,19 @@ const Home: NextPage = () => {
                             />
                         </div>
                     ) : (
-                        <div className="grow">
-                            <p
-                                className="mt-6 rounded-lg border border-red-600 bg-red-600/40 p-2 text-center text-sm text-red-100"
-                                title="Scraping page to fetch releases"
-                            >
-                                Could not find releases. Please verify the link.
-                            </p>
+                        <div className="mt-6 grow rounded-lg border border-red-600 bg-red-600/20 p-2 text-center text-sm text-red-50">
+                            <p className="mb-2 font-semibold">Could not find releases</p>
+                            <p className="text-sm">Please verify the link.</p>
                         </div>
                     ))}
+                {fetchMechanism === FetchMechanism.UNSUPPORTED && (
+                    <div className="mt-6 grow rounded-lg border border-red-600 bg-red-600/20 p-2 text-center text-sm text-red-50">
+                        <p className="mb-2 font-semibold">Unsupported link</p>
+                        <p className="text-sm">
+                            This app currently only supports a few hosts which can be scraped.
+                        </p>
+                    </div>
+                )}
                 {selectedReleases.length > 0 && (
                     <div className="grow basis-3/5">
                         <ChangelogContent releases={selectedReleases} />
@@ -224,7 +247,6 @@ const Home: NextPage = () => {
             </div>
 
             {showFeatures && <Features />}
-            <Footer />
         </main>
     );
 };

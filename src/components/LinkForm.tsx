@@ -51,7 +51,7 @@ export const LinkForm = ({
                 <input
                     type="text"
                     id="repository-link"
-                    className="peer w-full rounded-l-lg border border-gray-300 bg-gray-100 p-2.5 text-sm text-gray-900 focus:border-violet-500 focus:ring-violet-500"
+                    className="peer w-full rounded-l-lg border border-gray-300 bg-gray-100 p-2.5 text-sm text-gray-900 outline-none focus:border-violet-500 focus:ring-violet-500"
                     value={repositoryLink}
                     onChange={handleRepositoryLinkChange}
                     required
@@ -68,7 +68,7 @@ export const LinkForm = ({
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="z-10 w-10 rounded-r-lg bg-violet-600 p-2.5 text-sm font-medium text-white hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-800 disabled:bg-gray-700"
+                    className="z-10 w-10 rounded-r-lg bg-violet-600 p-2.5 text-sm font-medium text-white hover:bg-violet-700 focus:ring-violet-800 disabled:bg-gray-700"
                 >
                     {isLoading ? (
                         <>

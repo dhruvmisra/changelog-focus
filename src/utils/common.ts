@@ -5,7 +5,7 @@ import {
     type ChangelogMetadata,
     type SegregatedChangelog,
 } from "@/types";
-import { SLUG_LENGTH } from "@/constants";
+import { SCRAPING_SUPPORTED_HOSTS } from "@/constants";
 import { GITHUB_BASE_URL } from "@/constants/endpoints";
 
 export const urlEncode = (link: string): string => {
@@ -23,19 +23,6 @@ export const base64Encode = (text: string): string => {
 export const base64Decode = (encodedText: string): string => {
     return Buffer.from(encodedText, "base64").toString("utf-8");
 };
-
-export const slugify = (text: string): string =>
-    text
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, "-")
-        .replace(/[^\w-]+/g, "")
-        .replace(/--+/g, "-")
-        .substring(0, SLUG_LENGTH) +
-    "-" +
-    String(Math.floor(Math.random() * 10000000000000000));
 
 export const digest = async (message: string): Promise<string> => {
     let subtle;
@@ -61,13 +48,22 @@ export const getSearchableChangelogList = (segregatedChangelog: SegregatedChange
     return list;
 };
 
-export const getFetchMechanism = (repositoryLink: string): FetchMechanism => {
-    const splitUrl = repositoryLink.split(GITHUB_BASE_URL);
-    if (splitUrl.length < 2) {
-        return FetchMechanism.SCRAPING;
-    } else {
+const isHostSupported = (url: URL, supportedUrls: string[]) => {
+    const host = url.host;
+
+    return supportedUrls.some((supportedHost) => {
+        const regex = new RegExp("^(.*\\.)?" + supportedHost + "$");
+        return regex.test(host);
+    });
+};
+
+export const getFetchMechanism = (url: URL): FetchMechanism => {
+    if (url.host === GITHUB_BASE_URL) {
         return FetchMechanism.GITHUB;
+    } else if (isHostSupported(url, SCRAPING_SUPPORTED_HOSTS)) {
+        return FetchMechanism.SCRAPING;
     }
+    return FetchMechanism.UNSUPPORTED;
 };
 
 export const updateChangelogMetadataMatches = (

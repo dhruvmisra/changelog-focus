@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { DefaultSeo } from "next-seo";
 import NProgress from "nprogress";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { api } from "@/utils/api";
 import * as gtag from "@/utils/gtag";
 import { DEFAULT_SEO } from "@/utils/seo";
@@ -36,11 +37,12 @@ const MyApp: AppType = ({ Component, pageProps }) => {
     }, [router.events]);
 
     return (
-        <div className="container mx-auto min-h-screen px-4">
+        <div className="container mx-auto min-h-screen px-4 flex flex-col">
             <DefaultSeo {...DEFAULT_SEO} />
             <Header />
             <Toaster position="bottom-center" />
             <Component {...pageProps} />
+            <Footer />
         </div>
     );
 };

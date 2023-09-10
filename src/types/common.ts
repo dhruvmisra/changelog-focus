@@ -7,6 +7,7 @@ export enum AppEnvironment {
 export enum FetchMechanism {
     GITHUB = "GITHUB",
     SCRAPING = "SCRAPING",
+    UNSUPPORTED = "UNSUPPORTED",
 }
 
 export interface GitHubUrls {
