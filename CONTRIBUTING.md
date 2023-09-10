@@ -13,7 +13,6 @@ Code dontributions are welcome. If you're new to the project, you can open a pul
 To allow scraping from a new host:
 
 - Add the new host to `SCRAPING_ALLOWED_HOSTS` list in `./src/constants/index.ts`
-
 - Add the new host to the list in `./docs/allowed-hosts-for-scraping.md`
 
 Please refrain from adding personal websites to the list.
@@ -40,8 +39,7 @@ Please review [these impeccable guidelines][code review guidelines].
 
 You can monitor [issues][] and [discussions][], and help other people who have questions about contributing to Changelog Focus, or using it for their projects.
 
-Feel free to reach out to one of the [maintainers][]
-if you need help getting started.
+Feel free to reach out to one of the maintainers if you need help getting started.
 
 [code review guidelines]: https://kickstarter.engineering/a-guide-to-mindful-communication-in-code-reviews-48aab5282e5e
 [issues]: https://github.com/dhruvmisra/changelog-focus/issues
