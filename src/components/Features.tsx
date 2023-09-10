@@ -18,9 +18,13 @@ export const Features = () => {
                                 All GitHub repositories which maintain releases are supported.
                             </p>
                             <p className="text-gray-400">
-                                Some organisations don&apos;t maintain changelog in GitHub releases. For
-                                those cases, you can add a URL to the changelog page.
-                                (experimental)
+                                Some organisations don&apos;t maintain changelog in GitHub
+                                releases. For those cases, you can add a URL to the changelog page.
+                                (experimental - see{" "}
+                                <a href="https://github.com/dhruvmisra/changelog-focus/blob/main/docs/allowed-hosts-for-scraping.md">
+                                    allowed hosts
+                                </a>
+                                )
                             </p>
                         </div>
                         <div className="basis-full md:basis-1/2">
@@ -43,13 +47,14 @@ export const Features = () => {
                                 Select releases
                             </h3>
                             <p className="mb-2 text-gray-400">
-                                Pick all the releases for which you&apos;d like to view the changelog.
+                                Pick all the releases for which you&apos;d like to view the
+                                changelog.
                             </p>
                             <p className="text-gray-400">
-                                Let&apos;s say your application uses <code>v1.0.3</code> and you wish to
-                                upgrade to <code>v2.0.0</code>. You can then select all releases
-                                from the version after <code>v1.0.3</code> till <code>v2.0.0</code>
-                                .
+                                Let&apos;s say your application uses <code>v1.0.3</code> and you
+                                wish to upgrade to <code>v2.0.0</code>. You can then select all
+                                releases from the version after <code>v1.0.3</code> till{" "}
+                                <code>v2.0.0</code>.
                             </p>
                         </div>
                         <div className="basis-full md:basis-1/2">
