@@ -24,7 +24,7 @@
 
 Changelog Focus let's you aggregate changelog across releases and let's you pick and choose the changelog items relevant to your codebase.
 
-https://github.com/dhruvmisra/changelog-focus/assets/40134655/8512f266-be6c-48c2-ae21-1483c92034c3
+https://github.com/dhruvmisra/changelog-focus/assets/40134655/29825cae-2cf3-4433-a37c-3c7e2a32f196
 
 
 ## Motivation
